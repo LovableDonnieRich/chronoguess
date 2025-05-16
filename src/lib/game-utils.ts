@@ -38,6 +38,43 @@ export const initialGameState: GameState = {
   dayGuess: null,
 };
 
+// Sample historical events data
+const historicalEvents: HistoricalEvent[] = [
+  {
+    id: '1',
+    title: 'La scoperta dell\'America',
+    description: 'Cristoforo Colombo approda nel Nuovo Mondo, segnando l\'inizio dell\'era moderna delle esplorazioni europee.',
+    date: new Date('1492-10-12'),
+    category: 'Esplorazioni',
+    difficulty: 'easy',
+    imageUrl: 'https://images.unsplash.com/photo-1571172964533-d2d13d88ce7e?q=80&w=800&auto=format'
+  },
+  {
+    id: '2',
+    title: 'La caduta del muro di Berlino',
+    description: 'Il muro che divideva Berlino Est da Berlino Ovest viene abbattuto, simboleggiando la fine della Guerra Fredda.',
+    date: new Date('1989-11-09'),
+    category: 'Storia contemporanea',
+    difficulty: 'easy',
+    imageUrl: 'https://images.unsplash.com/photo-1597582324134-65a0d273152e?q=80&w=800&auto=format'
+  },
+  {
+    id: '3',
+    title: 'L\'unità d\'Italia',
+    description: 'Proclamazione del Regno d\'Italia con Vittorio Emanuele II come primo re d\'Italia.',
+    date: new Date('1861-03-17'),
+    category: 'Storia italiana',
+    difficulty: 'medium',
+    imageUrl: 'https://images.unsplash.com/photo-1529260830199-42c24126f198?q=80&w=800&auto=format'
+  }
+];
+
+// Get a random historical event
+export function getRandomEvent(): HistoricalEvent {
+  const randomIndex = Math.floor(Math.random() * historicalEvents.length);
+  return historicalEvents[randomIndex];
+}
+
 // Evaluate the guess accuracy
 export function evaluateGuess(
   guess: number,
