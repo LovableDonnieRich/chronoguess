@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { StarRating } from "@/components/StarRating";
 import { HistoricalEvent, formatDate, evaluateGuess } from "@/lib/game-utils";
+import { Check, X, AlertCircle } from "lucide-react";
 
 interface GameResultProps {
   event: HistoricalEvent;
@@ -27,86 +28,99 @@ export const GameResult = ({ event, yearGuess, monthGuess, dayGuess, onNextEvent
   // Calculate points: 1 for exact, 0.5 for close
   const points = exactGuesses + (closeGuesses * 0.5);
 
+  const getResultIcon = (result: 'exact' | 'close' | 'wrong') => {
+    switch (result) {
+      case 'exact': return <Check className="w-5 h-5 text-green-600" />;
+      case 'close': return <AlertCircle className="w-5 h-5 text-amber-600" />;
+      case 'wrong': return <X className="w-5 h-5 text-red-600" />;
+    }
+  };
+
   const getResultClass = (result: 'exact' | 'close' | 'wrong') => {
     switch (result) {
-      case 'exact': return 'text-green-600';
-      case 'close': return 'text-amber-600';
-      case 'wrong': return 'text-red-600';
+      case 'exact': return 'bg-green-100 text-green-800 border-green-200';
+      case 'close': return 'bg-amber-100 text-amber-800 border-amber-200';
+      case 'wrong': return 'bg-red-100 text-red-800 border-red-200';
     }
   };
 
   return (
-    <Card className="w-full max-w-md mx-auto historical-card bg-vintage-paper">
-      <CardHeader>
-        <CardTitle className="text-2xl text-vintage-ink">{event.title}</CardTitle>
-        <CardDescription className="text-vintage-text text-lg">
+    <Card className="w-full max-w-md mx-auto overflow-hidden rounded-xl shadow-lg border-0 bg-white">
+      <CardHeader className="bg-gradient-to-r from-indigo-600 to-blue-500 text-white p-6">
+        <CardTitle className="text-2xl">{event.title}</CardTitle>
+        <CardDescription className="text-indigo-100 text-lg">
           Risultato
         </CardDescription>
       </CardHeader>
-      <CardContent>
-        <div className="relative aspect-video mb-6 rounded-lg overflow-hidden">
+      <CardContent className="p-6">
+        <div className="relative aspect-video mb-6 rounded-lg overflow-hidden shadow-md">
           {event.imageUrl && (
             <img 
               src={event.imageUrl} 
               alt={event.title} 
-              className="object-cover w-full h-full" 
+              className="object-cover w-full h-full transform transition-transform hover:scale-105 duration-500" 
             />
           )}
         </div>
         
-        <p className="mb-6 text-vintage-text">{event.description}</p>
+        <p className="mb-6 text-gray-700">{event.description}</p>
         
         <div className="space-y-4">
-          <div className="flex justify-between items-center border-b border-vintage-accent/20 pb-2">
-            <span className="text-lg">Data corretta:</span>
-            <span className="font-semibold">{formatDate(event.date)}</span>
+          <div className="flex justify-between items-center border-b border-indigo-100 pb-4">
+            <span className="text-lg font-medium text-gray-800">Data corretta:</span>
+            <span className="font-semibold text-indigo-900 bg-indigo-50 px-3 py-1 rounded-md">
+              {formatDate(event.date)}
+            </span>
           </div>
           
-          <div className="flex justify-between items-center">
-            <span>La tua risposta:</span>
-            <span className="font-semibold">
+          <div className="flex justify-between items-center mb-4">
+            <span className="text-gray-600">La tua risposta:</span>
+            <span className="font-medium text-gray-800">
               {dayGuess}/{monthGuess}/{yearGuess}
             </span>
           </div>
           
-          <div className="space-y-2 mt-4">
-            <div className="flex justify-between items-center">
+          <div className="space-y-2 bg-gray-50 p-4 rounded-lg">
+            <div className={`flex justify-between items-center p-2 rounded-md border ${getResultClass(yearResult)}`}>
               <span>Anno:</span>
-              <span className={`font-semibold ${getResultClass(yearResult)}`}>
-                {yearGuess} {yearResult === 'exact' ? '✓' : yearResult === 'close' ? '≈' : '✗'}
-              </span>
+              <div className="flex items-center gap-2">
+                <span className="font-semibold">{yearGuess}</span>
+                {getResultIcon(yearResult)}
+              </div>
             </div>
             
-            <div className="flex justify-between items-center">
+            <div className={`flex justify-between items-center p-2 rounded-md border ${getResultClass(monthResult)}`}>
               <span>Mese:</span>
-              <span className={`font-semibold ${getResultClass(monthResult)}`}>
-                {monthGuess} {monthResult === 'exact' ? '✓' : monthResult === 'close' ? '≈' : '✗'}
-              </span>
+              <div className="flex items-center gap-2">
+                <span className="font-semibold">{monthGuess}</span>
+                {getResultIcon(monthResult)}
+              </div>
             </div>
             
-            <div className="flex justify-between items-center">
+            <div className={`flex justify-between items-center p-2 rounded-md border ${getResultClass(dayResult)}`}>
               <span>Giorno:</span>
-              <span className={`font-semibold ${getResultClass(dayResult)}`}>
-                {dayGuess} {dayResult === 'exact' ? '✓' : dayResult === 'close' ? '≈' : '✗'}
-              </span>
+              <div className="flex items-center gap-2">
+                <span className="font-semibold">{dayGuess}</span>
+                {getResultIcon(dayResult)}
+              </div>
             </div>
           </div>
           
-          <div className="flex justify-between items-center border-t border-vintage-accent/20 pt-4 mt-4">
-            <span className="text-lg font-semibold">Punteggio:</span>
+          <div className="flex justify-between items-center border-t border-indigo-100 pt-4 mt-4">
+            <span className="text-lg font-semibold text-gray-800">Punteggio:</span>
             <div className="flex items-center gap-2">
               <StarRating exactGuesses={exactGuesses} closeGuesses={closeGuesses} />
-              <span className="text-lg font-semibold">({points} pt)</span>
+              <span className="text-lg font-semibold text-indigo-900">({points} pt)</span>
             </div>
           </div>
         </div>
       </CardContent>
-      <CardFooter className="flex justify-end">
+      <CardFooter className="bg-gray-50 p-6 flex justify-end">
         <Button 
           onClick={onNextEvent}
-          className="bg-vintage-accent hover:bg-vintage-accent/80 text-white"
+          className="bg-gradient-to-r from-indigo-600 to-blue-500 hover:from-indigo-700 hover:to-blue-600 text-white font-medium px-6 py-3 rounded-lg transition-transform hover:scale-105"
         >
-          Prossimo evento
+          Torna domani
         </Button>
       </CardFooter>
     </Card>

@@ -1,4 +1,3 @@
-
 // Game scoring utilities
 export interface Score {
   exactGuesses: number;
@@ -23,6 +22,7 @@ export interface GameState {
   yearGuess: number | null;
   monthGuess: number | null;
   dayGuess: number | null;
+  lastPlayedDate: string | null;
 }
 
 export const initialGameState: GameState = {
@@ -36,43 +36,42 @@ export const initialGameState: GameState = {
   yearGuess: null,
   monthGuess: null,
   dayGuess: null,
+  lastPlayedDate: null,
 };
 
 // Sample historical events data
-const historicalEvents: HistoricalEvent[] = [
-  {
-    id: '1',
-    title: 'La scoperta dell\'America',
-    description: 'Cristoforo Colombo approda nel Nuovo Mondo, segnando l\'inizio dell\'era moderna delle esplorazioni europee.',
-    date: new Date('1492-10-12'),
-    category: 'Esplorazioni',
-    difficulty: 'easy',
-    imageUrl: 'https://images.unsplash.com/photo-1571172964533-d2d13d88ce7e?q=80&w=800&auto=format'
-  },
-  {
-    id: '2',
-    title: 'La caduta del muro di Berlino',
-    description: 'Il muro che divideva Berlino Est da Berlino Ovest viene abbattuto, simboleggiando la fine della Guerra Fredda.',
-    date: new Date('1989-11-09'),
-    category: 'Storia contemporanea',
-    difficulty: 'easy',
-    imageUrl: 'https://images.unsplash.com/photo-1597582324134-65a0d273152e?q=80&w=800&auto=format'
-  },
-  {
-    id: '3',
-    title: 'L\'unità d\'Italia',
-    description: 'Proclamazione del Regno d\'Italia con Vittorio Emanuele II come primo re d\'Italia.',
-    date: new Date('1861-03-17'),
-    category: 'Storia italiana',
-    difficulty: 'medium',
-    imageUrl: 'https://images.unsplash.com/photo-1529260830199-42c24126f198?q=80&w=800&auto=format'
-  }
-];
+import { historicalEvents, getRandomEvent as getRandomEventFromData } from '@/data/historical-events';
 
-// Get a random historical event
+// Get today's event based on the date
+export function getTodaysEvent(): HistoricalEvent {
+  // Use the date as a seed to select a consistent event for each day
+  const today = new Date().toISOString().split('T')[0]; // Format: YYYY-MM-DD
+  
+  // Use a simple hash of the date string to get a consistent index
+  let hash = 0;
+  for (let i = 0; i < today.length; i++) {
+    hash = ((hash << 5) - hash) + today.charCodeAt(i);
+    hash = hash & hash; // Convert to 32bit integer
+  }
+  
+  // Use the absolute value of hash to ensure positive index
+  const positiveHash = Math.abs(hash);
+  const index = positiveHash % historicalEvents.length;
+  
+  return historicalEvents[index];
+}
+
+// Check if the user has already played today
+export function hasPlayedToday(lastPlayedDate: string | null): boolean {
+  if (!lastPlayedDate) return false;
+  
+  const today = new Date().toISOString().split('T')[0];
+  return lastPlayedDate === today;
+}
+
+// Get a random historical event (keeping this for compatibility)
 export function getRandomEvent(): HistoricalEvent {
-  const randomIndex = Math.floor(Math.random() * historicalEvents.length);
-  return historicalEvents[randomIndex];
+  return getRandomEventFromData();
 }
 
 // Evaluate the guess accuracy
