@@ -49,32 +49,22 @@ export const GameResult = ({ event, yearGuess, monthGuess, dayGuess, onNextEvent
       <CardHeader className="bg-gradient-to-r from-indigo-600 to-blue-500 text-white p-6">
         <CardTitle className="text-2xl">{event.title}</CardTitle>
         <CardDescription className="text-indigo-100 text-lg">
-          Risultato
+          Result
         </CardDescription>
       </CardHeader>
       <CardContent className="p-6">
-        <div className="relative aspect-video mb-6 rounded-lg overflow-hidden shadow-md">
-          {event.imageUrl && (
-            <img 
-              src={event.imageUrl} 
-              alt={event.title} 
-              className="object-cover w-full h-full transform transition-transform hover:scale-105 duration-500" 
-            />
-          )}
-        </div>
-        
         <p className="mb-6 text-gray-700">{event.description}</p>
         
         <div className="space-y-4">
           <div className="flex justify-between items-center border-b border-indigo-100 pb-4">
-            <span className="text-lg font-medium text-gray-800">Data corretta:</span>
+            <span className="text-lg font-medium text-gray-800">Correct date:</span>
             <span className="font-semibold text-indigo-900 bg-indigo-50 px-3 py-1 rounded-md">
               {formatDate(event.date)}
             </span>
           </div>
           
           <div className="flex justify-between items-center mb-4">
-            <span className="text-gray-600">La tua risposta:</span>
+            <span className="text-gray-600">Your guess:</span>
             <span className="font-medium text-gray-800">
               {dayGuess}/{monthGuess}/{yearGuess}
             </span>
@@ -82,7 +72,7 @@ export const GameResult = ({ event, yearGuess, monthGuess, dayGuess, onNextEvent
           
           <div className="space-y-2 bg-gray-50 p-4 rounded-lg">
             <div className={`flex justify-between items-center p-2 rounded-md border ${getResultClass(yearResult)}`}>
-              <span>Anno:</span>
+              <span>Year:</span>
               <div className="flex items-center gap-2">
                 <span className="font-semibold">{yearGuess}</span>
                 {getResultIcon(yearResult)}
@@ -90,7 +80,7 @@ export const GameResult = ({ event, yearGuess, monthGuess, dayGuess, onNextEvent
             </div>
             
             <div className={`flex justify-between items-center p-2 rounded-md border ${getResultClass(monthResult)}`}>
-              <span>Mese:</span>
+              <span>Month:</span>
               <div className="flex items-center gap-2">
                 <span className="font-semibold">{monthGuess}</span>
                 {getResultIcon(monthResult)}
@@ -98,7 +88,7 @@ export const GameResult = ({ event, yearGuess, monthGuess, dayGuess, onNextEvent
             </div>
             
             <div className={`flex justify-between items-center p-2 rounded-md border ${getResultClass(dayResult)}`}>
-              <span>Giorno:</span>
+              <span>Day:</span>
               <div className="flex items-center gap-2">
                 <span className="font-semibold">{dayGuess}</span>
                 {getResultIcon(dayResult)}
@@ -107,10 +97,10 @@ export const GameResult = ({ event, yearGuess, monthGuess, dayGuess, onNextEvent
           </div>
           
           <div className="flex justify-between items-center border-t border-indigo-100 pt-4 mt-4">
-            <span className="text-lg font-semibold text-gray-800">Punteggio:</span>
+            <span className="text-lg font-semibold text-gray-800">Score:</span>
             <div className="flex items-center gap-2">
               <StarRating exactGuesses={exactGuesses} closeGuesses={closeGuesses} />
-              <span className="text-lg font-semibold text-indigo-900">({points} pt)</span>
+              <span className="text-lg font-semibold text-indigo-900">({points} pts)</span>
             </div>
           </div>
         </div>
@@ -120,7 +110,7 @@ export const GameResult = ({ event, yearGuess, monthGuess, dayGuess, onNextEvent
           onClick={onNextEvent}
           className="bg-gradient-to-r from-indigo-600 to-blue-500 hover:from-indigo-700 hover:to-blue-600 text-white font-medium px-6 py-3 rounded-lg transition-transform hover:scale-105"
         >
-          Torna domani
+          Come back tomorrow
         </Button>
       </CardFooter>
     </Card>

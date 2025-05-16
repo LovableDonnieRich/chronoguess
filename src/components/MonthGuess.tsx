@@ -25,28 +25,19 @@ export const MonthGuess = ({ event, yearGuess, onGuess }: MonthGuessProps) => {
       <CardHeader>
         <CardTitle className="text-2xl text-vintage-ink">{event.title}</CardTitle>
         <CardDescription className="text-vintage-text text-lg">
-          In che mese dell'anno {yearGuess} è accaduto questo evento?
+          In which month of {yearGuess} did this event happen?
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="relative aspect-video mb-6 rounded-lg overflow-hidden">
-          {event.imageUrl && (
-            <img 
-              src={event.imageUrl} 
-              alt={event.title} 
-              className="object-cover w-full h-full"
-            />
-          )}
-        </div>
         <p className="mb-6 text-vintage-text">{event.description}</p>
         <div className="flex flex-col gap-4">
           <div>
             <label htmlFor="monthGuess" className="block text-sm font-medium text-vintage-text mb-1">
-              Mese
+              Month
             </label>
             <Select onValueChange={setSelectedMonth}>
               <SelectTrigger className="bg-vintage-background border-vintage-accent/30 focus-visible:ring-vintage-accent">
-                <SelectValue placeholder="Seleziona un mese" />
+                <SelectValue placeholder="Select a month" />
               </SelectTrigger>
               <SelectContent>
                 {Array.from({ length: 12 }, (_, i) => i + 1).map((month) => (
@@ -65,7 +56,7 @@ export const MonthGuess = ({ event, yearGuess, onGuess }: MonthGuessProps) => {
           disabled={!selectedMonth}
           className="bg-vintage-accent hover:bg-vintage-accent/80 text-white"
         >
-          Conferma
+          Confirm
         </Button>
       </CardFooter>
     </Card>

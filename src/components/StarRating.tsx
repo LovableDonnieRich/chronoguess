@@ -11,9 +11,10 @@ export const StarRating = ({ exactGuesses, closeGuesses }: StarRatingProps) => {
   
   const renderStars = () => {
     const stars = [];
+    const maxStars = 3; // Changed from 5 to 3
     
     // Add full stars
-    for (let i = 0; i < Math.floor(totalStars); i++) {
+    for (let i = 0; i < Math.min(Math.floor(totalStars), maxStars); i++) {
       stars.push(
         <Star 
           key={`full-${i}`} 
@@ -25,7 +26,7 @@ export const StarRating = ({ exactGuesses, closeGuesses }: StarRatingProps) => {
     }
     
     // Add half star if needed
-    if (totalStars % 1 !== 0) {
+    if (totalStars % 1 !== 0 && stars.length < maxStars) {
       stars.push(
         <StarHalf 
           key="half" 
@@ -36,8 +37,8 @@ export const StarRating = ({ exactGuesses, closeGuesses }: StarRatingProps) => {
       );
     }
     
-    // Add empty stars to reach 5 stars total
-    const emptyStars = 5 - stars.length;
+    // Add empty stars to reach maxStars total
+    const emptyStars = maxStars - stars.length;
     for (let i = 0; i < emptyStars; i++) {
       stars.push(
         <Star 

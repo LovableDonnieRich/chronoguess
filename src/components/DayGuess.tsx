@@ -31,28 +31,19 @@ export const DayGuess = ({ event, yearGuess, monthGuess, onGuess }: DayGuessProp
       <CardHeader>
         <CardTitle className="text-2xl text-vintage-ink">{event.title}</CardTitle>
         <CardDescription className="text-vintage-text text-lg">
-          In che giorno di {getMonthName(monthGuess)} {yearGuess} è accaduto questo evento?
+          On which day of {getMonthName(monthGuess)} {yearGuess} did this event happen?
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="relative aspect-video mb-6 rounded-lg overflow-hidden">
-          {event.imageUrl && (
-            <img 
-              src={event.imageUrl} 
-              alt={event.title} 
-              className="object-cover w-full h-full" 
-            />
-          )}
-        </div>
         <p className="mb-6 text-vintage-text">{event.description}</p>
         <div className="flex flex-col gap-4">
           <div>
             <label htmlFor="dayGuess" className="block text-sm font-medium text-vintage-text mb-1">
-              Giorno
+              Day
             </label>
             <Select onValueChange={setSelectedDay}>
               <SelectTrigger className="bg-vintage-background border-vintage-accent/30 focus-visible:ring-vintage-accent">
-                <SelectValue placeholder="Seleziona un giorno" />
+                <SelectValue placeholder="Select a day" />
               </SelectTrigger>
               <SelectContent>
                 {Array.from({ length: daysInMonth }, (_, i) => i + 1).map((day) => (
@@ -71,7 +62,7 @@ export const DayGuess = ({ event, yearGuess, monthGuess, onGuess }: DayGuessProp
           disabled={!selectedDay}
           className="bg-vintage-accent hover:bg-vintage-accent/80 text-white"
         >
-          Conferma
+          Confirm
         </Button>
       </CardFooter>
     </Card>

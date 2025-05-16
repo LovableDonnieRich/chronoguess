@@ -20,12 +20,12 @@ export const YearGuess = ({ event, onGuess }: YearGuessProps) => {
     const yearGuess = parseInt(inputValue, 10);
     
     if (isNaN(yearGuess)) {
-      setError("Inserisci un anno valido");
+      setError("Please enter a valid year");
       return;
     }
     
     if (yearGuess < 0 || yearGuess > new Date().getFullYear()) {
-      setError(`Inserisci un anno tra 0 e ${new Date().getFullYear()}`);
+      setError(`Please enter a year between 0 and ${new Date().getFullYear()}`);
       return;
     }
     
@@ -37,32 +37,23 @@ export const YearGuess = ({ event, onGuess }: YearGuessProps) => {
       <CardHeader>
         <CardTitle className="text-2xl text-vintage-ink">{event.title}</CardTitle>
         <CardDescription className="text-vintage-text text-lg">
-          In che anno è accaduto questo evento?
+          In which year did this event happen?
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="relative aspect-video mb-6 rounded-lg overflow-hidden">
-          {event.imageUrl && (
-            <img 
-              src={event.imageUrl} 
-              alt={event.title} 
-              className="object-cover w-full h-full"
-            />
-          )}
-        </div>
         <p className="mb-6 text-vintage-text">{event.description}</p>
         <form onSubmit={handleSubmit}>
           <div className="flex flex-col gap-4">
             <div>
               <label htmlFor="yearGuess" className="block text-sm font-medium text-vintage-text mb-1">
-                Anno
+                Year
               </label>
               <Input
                 id="yearGuess"
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
                 type="number"
-                placeholder="Inserisci l'anno"
+                placeholder="Enter year"
                 className="bg-vintage-background border-vintage-accent/30 focus-visible:ring-vintage-accent"
               />
               {error && <p className="text-destructive text-sm mt-1">{error}</p>}
@@ -75,7 +66,7 @@ export const YearGuess = ({ event, onGuess }: YearGuessProps) => {
           onClick={handleSubmit} 
           className="bg-vintage-accent hover:bg-vintage-accent/80 text-white"
         >
-          Conferma
+          Confirm
         </Button>
       </CardFooter>
     </Card>

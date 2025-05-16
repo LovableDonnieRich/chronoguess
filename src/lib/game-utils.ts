@@ -1,3 +1,4 @@
+
 // Game scoring utilities
 export interface Score {
   exactGuesses: number;
@@ -12,7 +13,6 @@ export interface HistoricalEvent {
   date: Date;
   category: string;
   difficulty: 'easy' | 'medium' | 'hard';
-  imageUrl?: string;
 }
 
 export interface GameState {
@@ -39,26 +39,88 @@ export const initialGameState: GameState = {
   lastPlayedDate: null,
 };
 
-// Sample historical events data
-import { historicalEvents, getRandomEvent as getRandomEventFromData } from '@/data/historical-events';
+// Get a random number between min and max (inclusive)
+function getRandomNumber(min: number, max: number): number {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+// Get the last day of a specific month
+function getLastDayOfMonth(year: number, month: number): number {
+  // JavaScript months are 0-indexed, so we use month and not month-1
+  return new Date(year, month, 0).getDate();
+}
+
+// Fetch a historical event from the API
+async function fetchHistoricalEvent(): Promise<HistoricalEvent | null> {
+  try {
+    // Generate random month and day
+    const month = getRandomNumber(1, 12);
+    const maxDay = getLastDayOfMonth(new Date().getFullYear(), month);
+    const day = getRandomNumber(1, maxDay);
+    
+    // Construct the API URL
+    const url = `https://events.historylabs.io/date?month=${month}&day=${day}&minYear=1100`;
+    
+    const response = await fetch(url);
+    if (!response.ok) {
+      console.error('Failed to fetch events:', response.statusText);
+      return null;
+    }
+    
+    const events = await response.json();
+    
+    // If no events are returned
+    if (!events || events.length === 0) {
+      console.error('No events found for the given date');
+      return null;
+    }
+    
+    // Get a random event from the results
+    const randomIndex = Math.floor(Math.random() * events.length);
+    const event = events[randomIndex];
+    
+    // Transform the event to match our expected format
+    const historicalEvent: HistoricalEvent = {
+      id: event.id?.toString() || Math.random().toString(36).substr(2, 9),
+      title: event.title || 'Historical Event',
+      description: event.description || 'A significant historical event.',
+      date: new Date(event.date),
+      category: event.category || 'History',
+      difficulty: determineDifficulty(new Date(event.date)),
+    };
+    
+    return historicalEvent;
+  } catch (error) {
+    console.error('Error fetching historical event:', error);
+    return null;
+  }
+}
+
+// Determine difficulty based on the date
+function determineDifficulty(date: Date): 'easy' | 'medium' | 'hard' {
+  const year = date.getFullYear();
+  if (year > 1900) return 'easy';
+  if (year > 1700) return 'medium';
+  return 'hard';
+}
 
 // Get today's event based on the date
-export function getTodaysEvent(): HistoricalEvent {
-  // Use the date as a seed to select a consistent event for each day
-  const today = new Date().toISOString().split('T')[0]; // Format: YYYY-MM-DD
+export async function getTodaysEvent(): Promise<HistoricalEvent> {
+  const event = await fetchHistoricalEvent();
   
-  // Use a simple hash of the date string to get a consistent index
-  let hash = 0;
-  for (let i = 0; i < today.length; i++) {
-    hash = ((hash << 5) - hash) + today.charCodeAt(i);
-    hash = hash & hash; // Convert to 32bit integer
+  // Fallback event in case the API fails
+  if (!event) {
+    return {
+      id: '1',
+      title: 'Discovery of America',
+      description: 'Christopher Columbus reaches the Americas, marking the beginning of European exploration in the New World.',
+      date: new Date('1492-10-12'),
+      category: 'Exploration',
+      difficulty: 'easy',
+    };
   }
   
-  // Use the absolute value of hash to ensure positive index
-  const positiveHash = Math.abs(hash);
-  const index = positiveHash % historicalEvents.length;
-  
-  return historicalEvents[index];
+  return event;
 }
 
 // Check if the user has already played today
@@ -67,11 +129,6 @@ export function hasPlayedToday(lastPlayedDate: string | null): boolean {
   
   const today = new Date().toISOString().split('T')[0];
   return lastPlayedDate === today;
-}
-
-// Get a random historical event (keeping this for compatibility)
-export function getRandomEvent(): HistoricalEvent {
-  return getRandomEventFromData();
 }
 
 // Evaluate the guess accuracy
@@ -95,30 +152,30 @@ export function evaluateGuess(
   }
 }
 
-// Format the date in Italian
+// Format the date
 export function formatDate(date: Date): string {
-  return new Intl.DateTimeFormat('it-IT', {
+  return new Intl.DateTimeFormat('en-US', {
     day: 'numeric',
     month: 'long',
     year: 'numeric',
   }).format(date);
 }
 
-// Get month name in Italian
+// Get month name
 export function getMonthName(month: number): string {
   const date = new Date();
   date.setMonth(month - 1);
-  return new Intl.DateTimeFormat('it-IT', { month: 'long' }).format(date);
+  return new Intl.DateTimeFormat('en-US', { month: 'long' }).format(date);
 }
 
 // Save game state to localStorage
 export function saveGameState(state: GameState): void {
-  localStorage.setItem('cronoindovina-game-state', JSON.stringify(state));
+  localStorage.setItem('chronoguess-game-state', JSON.stringify(state));
 }
 
 // Load game state from localStorage
 export function loadGameState(): GameState | null {
-  const savedState = localStorage.getItem('cronoindovina-game-state');
+  const savedState = localStorage.getItem('chronoguess-game-state');
   if (savedState) {
     const state = JSON.parse(savedState);
     // Convert date string back to Date object
@@ -132,5 +189,5 @@ export function loadGameState(): GameState | null {
 
 // Clear game state from localStorage
 export function clearGameState(): void {
-  localStorage.removeItem('cronoindovina-game-state');
+  localStorage.removeItem('chronoguess-game-state');
 }

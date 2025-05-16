@@ -20,17 +20,24 @@ import { useToast } from "@/hooks/use-toast";
 
 const Index = () => {
   const [gameState, setGameState] = useState<GameState>(initialGameState);
+  const [loading, setLoading] = useState<boolean>(true);
   const { toast } = useToast();
   
   // Initialize game on first load
   useEffect(() => {
-    const savedState = loadGameState();
+    const initGame = async () => {
+      setLoading(true);
+      const savedState = loadGameState();
+      
+      if (savedState && hasPlayedToday(savedState.lastPlayedDate)) {
+        setGameState(savedState);
+      } else {
+        await startNewGame();
+      }
+      setLoading(false);
+    };
     
-    if (savedState && hasPlayedToday(savedState.lastPlayedDate)) {
-      setGameState(savedState);
-    } else {
-      startNewGame();
-    }
+    initGame();
   }, []);
   
   // Save game state whenever it changes
@@ -40,13 +47,17 @@ const Index = () => {
     }
   }, [gameState]);
   
-  const startNewGame = () => {
+  const startNewGame = async () => {
+    setLoading(true);
     const today = new Date().toISOString().split('T')[0];
+    const todaysEvent = await getTodaysEvent();
+    
     setGameState({
       ...initialGameState,
-      currentEvent: getTodaysEvent(),
+      currentEvent: todaysEvent,
       lastPlayedDate: today,
     });
+    setLoading(false);
   };
   
   const handleYearGuess = (year: number) => {
@@ -61,22 +72,22 @@ const Index = () => {
       newScore.exactGuesses += 1;
       newScore.totalPoints += 1;
       toast({
-        title: "Anno esatto!",
-        description: `Hai indovinato esattamente l'anno: ${actualYear}`,
+        title: "Exact year!",
+        description: `You guessed the exact year: ${actualYear}`,
         variant: "default",
       });
     } else if (yearResult === 'close') {
       newScore.closeGuesses += 1;
       newScore.totalPoints += 0.5;
       toast({
-        title: "Anno vicino!",
-        description: `Eri vicino! L'anno esatto era ${actualYear}`,
+        title: "Close year!",
+        description: `You were close! The exact year was ${actualYear}`,
         variant: "default",
       });
     } else {
       toast({
-        title: "Anno sbagliato",
-        description: `L'anno esatto era ${actualYear}`,
+        title: "Wrong year",
+        description: `The exact year was ${actualYear}`,
         variant: "destructive",
       });
     }
@@ -101,22 +112,22 @@ const Index = () => {
       newScore.exactGuesses += 1;
       newScore.totalPoints += 1;
       toast({
-        title: "Mese esatto!",
-        description: `Hai indovinato esattamente il mese: ${actualMonth}`,
+        title: "Exact month!",
+        description: `You guessed the exact month: ${actualMonth}`,
         variant: "default",
       });
     } else if (monthResult === 'close') {
       newScore.closeGuesses += 1;
       newScore.totalPoints += 0.5;
       toast({
-        title: "Mese vicino!",
-        description: `Eri vicino! Il mese esatto era ${actualMonth}`,
+        title: "Close month!",
+        description: `You were close! The exact month was ${actualMonth}`,
         variant: "default",
       });
     } else {
       toast({
-        title: "Mese sbagliato",
-        description: `Il mese esatto era ${actualMonth}`,
+        title: "Wrong month",
+        description: `The exact month was ${actualMonth}`,
         variant: "destructive",
       });
     }
@@ -141,22 +152,22 @@ const Index = () => {
       newScore.exactGuesses += 1;
       newScore.totalPoints += 1;
       toast({
-        title: "Giorno esatto!",
-        description: `Hai indovinato esattamente il giorno: ${actualDay}`,
+        title: "Exact day!",
+        description: `You guessed the exact day: ${actualDay}`,
         variant: "default",
       });
     } else if (dayResult === 'close') {
       newScore.closeGuesses += 1;
       newScore.totalPoints += 0.5;
       toast({
-        title: "Giorno vicino!",
-        description: `Eri vicino! Il giorno esatto era ${actualDay}`,
+        title: "Close day!",
+        description: `You were close! The exact day was ${actualDay}`,
         variant: "default",
       });
     } else {
       toast({
-        title: "Giorno sbagliato",
-        description: `Il giorno esatto era ${actualDay}`,
+        title: "Wrong day",
+        description: `The exact day was ${actualDay}`,
         variant: "destructive",
       });
     }
@@ -172,20 +183,28 @@ const Index = () => {
   const handleNextEvent = () => {
     // Since we're doing one event per day, we should show a message that they need to wait
     toast({
-      title: "Torna domani!",
-      description: "Un nuovo evento storico sarà disponibile domani.",
+      title: "Come back tomorrow!",
+      description: "A new historical event will be available tomorrow.",
       variant: "default",
     });
   };
+  
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-blue-50 to-indigo-100">
+        <div className="text-indigo-600 text-xl">Loading...</div>
+      </div>
+    );
+  }
   
   if (!gameState.currentEvent) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-blue-50 to-indigo-100">
         <Button 
-          onClick={startNewGame}
+          onClick={() => startNewGame()}
           className="bg-indigo-600 hover:bg-indigo-700 text-white text-lg p-6 rounded-xl shadow-lg transition-transform hover:scale-105"
         >
-          Inizia il gioco
+          Start game
         </Button>
       </div>
     );
@@ -198,9 +217,9 @@ const Index = () => {
         
         {hasPlayedToday(gameState.lastPlayedDate) && gameState.guessStage === 'result' && (
           <Alert className="mb-6 bg-blue-50 border-blue-200">
-            <AlertTitle className="text-blue-800">Evento giornaliero completato!</AlertTitle>
+            <AlertTitle className="text-blue-800">Daily event completed!</AlertTitle>
             <AlertDescription className="text-blue-600">
-              Hai già giocato l'evento di oggi. Torna domani per un nuovo evento storico!
+              You've already played today's event. Come back tomorrow for a new historical event!
             </AlertDescription>
           </Alert>
         )}
