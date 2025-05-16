@@ -9,7 +9,92 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      events: {
+        Row: {
+          category: string
+          created_at: string | null
+          description: string
+          difficulty: string
+          event_date: string
+          id: string
+          title: string
+        }
+        Insert: {
+          category: string
+          created_at?: string | null
+          description: string
+          difficulty: string
+          event_date: string
+          id?: string
+          title: string
+        }
+        Update: {
+          category?: string
+          created_at?: string | null
+          description?: string
+          difficulty?: string
+          event_date?: string
+          id?: string
+          title?: string
+        }
+        Relationships: []
+      }
+      user_scores: {
+        Row: {
+          close_guesses: number
+          day_accuracy: string | null
+          day_guess: number | null
+          event_id: string
+          exact_guesses: number
+          id: string
+          month_accuracy: string | null
+          month_guess: number | null
+          played_at: string | null
+          total_points: number
+          user_id: string
+          year_accuracy: string | null
+          year_guess: number | null
+        }
+        Insert: {
+          close_guesses?: number
+          day_accuracy?: string | null
+          day_guess?: number | null
+          event_id: string
+          exact_guesses?: number
+          id?: string
+          month_accuracy?: string | null
+          month_guess?: number | null
+          played_at?: string | null
+          total_points?: number
+          user_id: string
+          year_accuracy?: string | null
+          year_guess?: number | null
+        }
+        Update: {
+          close_guesses?: number
+          day_accuracy?: string | null
+          day_guess?: number | null
+          event_id?: string
+          exact_guesses?: number
+          id?: string
+          month_accuracy?: string | null
+          month_guess?: number | null
+          played_at?: string | null
+          total_points?: number
+          user_id?: string
+          year_accuracy?: string | null
+          year_guess?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_scores_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never

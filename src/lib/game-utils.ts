@@ -1,4 +1,6 @@
 
+import { saveEventToDatabase, checkEventExists } from './supabase-utils';
+
 // Game scoring utilities
 export interface Score {
   exactGuesses: number;
@@ -106,6 +108,7 @@ function determineDifficulty(date: Date): 'easy' | 'medium' | 'hard' {
 
 // Get today's event based on the date
 export async function getTodaysEvent(): Promise<HistoricalEvent> {
+  // Try to fetch an event from the API
   const event = await fetchHistoricalEvent();
   
   // Fallback event in case the API fails
@@ -119,6 +122,9 @@ export async function getTodaysEvent(): Promise<HistoricalEvent> {
       difficulty: 'easy',
     };
   }
+  
+  // Save the event to the database
+  await saveEventToDatabase(event);
   
   return event;
 }

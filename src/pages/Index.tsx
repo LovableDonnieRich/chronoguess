@@ -1,5 +1,6 @@
 
 import { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { YearGuess } from "@/components/YearGuess";
 import { MonthGuess } from "@/components/MonthGuess";
 import { DayGuess } from "@/components/DayGuess";
@@ -17,19 +18,41 @@ import {
 import { Button } from "@/components/ui/button";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
+import { saveUserScore, getUserTotalScore, hasUserPlayedEvent } from "@/lib/supabase-utils";
 
 const Index = () => {
   const [gameState, setGameState] = useState<GameState>(initialGameState);
   const [loading, setLoading] = useState<boolean>(true);
+  const { user, isLoading: authLoading } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
   
   // Initialize game on first load
   useEffect(() => {
     const initGame = async () => {
+      if (authLoading) return;
+      
+      // Redirect to auth if not logged in
+      if (!user) {
+        navigate("/auth");
+        return;
+      }
+      
       setLoading(true);
       const savedState = loadGameState();
       
       if (savedState && hasPlayedToday(savedState.lastPlayedDate)) {
+        // Update score for returning users
+        if (user) {
+          const userScore = await getUserTotalScore(user.id);
+          savedState.score = {
+            exactGuesses: userScore.exactGuesses,
+            closeGuesses: userScore.closeGuesses,
+            totalPoints: userScore.totalPoints
+          };
+        }
+        
         setGameState(savedState);
       } else {
         await startNewGame();
@@ -38,7 +61,7 @@ const Index = () => {
     };
     
     initGame();
-  }, []);
+  }, [authLoading, user]);
   
   // Save game state whenever it changes
   useEffect(() => {
@@ -52,10 +75,38 @@ const Index = () => {
     const today = new Date().toISOString().split('T')[0];
     const todaysEvent = await getTodaysEvent();
     
+    // If user is logged in, check if they've played this event
+    let userHasPlayed = false;
+    if (user) {
+      userHasPlayed = await hasUserPlayedEvent(user.id, todaysEvent.id);
+    }
+    
+    // If user has played this event, get a different one
+    if (userHasPlayed) {
+      // For now, just use the event anyway
+      // In a real app, you'd want to get a different event
+    }
+    
+    // Get total user score from Supabase
+    let userScore = {
+      exactGuesses: 0,
+      closeGuesses: 0,
+      totalPoints: 0
+    };
+    
+    if (user) {
+      userScore = await getUserTotalScore(user.id);
+    }
+    
     setGameState({
       ...initialGameState,
       currentEvent: todaysEvent,
       lastPlayedDate: today,
+      score: {
+        exactGuesses: userScore.exactGuesses,
+        closeGuesses: userScore.closeGuesses,
+        totalPoints: userScore.totalPoints
+      }
     });
     setLoading(false);
   };
@@ -140,7 +191,7 @@ const Index = () => {
     });
   };
   
-  const handleDayGuess = (day: number) => {
+  const handleDayGuess = async (day: number) => {
     if (!gameState.currentEvent) return;
     
     const actualDay = gameState.currentEvent.date.getDate();
@@ -172,6 +223,37 @@ const Index = () => {
       });
     }
     
+    // Save score to Supabase if user is logged in
+    if (user && gameState.currentEvent && gameState.yearGuess !== null && gameState.monthGuess !== null) {
+      const yearResult = evaluateGuess(gameState.yearGuess, gameState.currentEvent.date.getFullYear(), 'year');
+      const monthResult = evaluateGuess(gameState.monthGuess, gameState.currentEvent.date.getMonth() + 1, 'month');
+      
+      // Count total points from all guesses
+      const totalPoints = 
+        (yearResult === 'exact' ? 1 : yearResult === 'close' ? 0.5 : 0) +
+        (monthResult === 'exact' ? 1 : monthResult === 'close' ? 0.5 : 0) +
+        (dayResult === 'exact' ? 1 : dayResult === 'close' ? 0.5 : 0);
+      
+      // Count exact and close guesses
+      const exactGuesses = [yearResult, monthResult, dayResult].filter(r => r === 'exact').length;
+      const closeGuesses = [yearResult, monthResult, dayResult].filter(r => r === 'close').length;
+      
+      // Save user score to database
+      await saveUserScore(
+        user.id,
+        gameState.currentEvent.id,
+        gameState.yearGuess,
+        yearResult,
+        gameState.monthGuess,
+        monthResult,
+        day,
+        dayResult,
+        totalPoints,
+        exactGuesses,
+        closeGuesses
+      );
+    }
+    
     setGameState({
       ...gameState,
       guessStage: 'result',
@@ -189,12 +271,16 @@ const Index = () => {
     });
   };
   
-  if (loading) {
+  if (loading || authLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-blue-50 to-indigo-100">
         <div className="text-indigo-600 text-xl">Loading...</div>
       </div>
     );
+  }
+  
+  if (!user) {
+    return <Navigate to="/auth" replace />;
   }
   
   if (!gameState.currentEvent) {
