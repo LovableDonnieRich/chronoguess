@@ -11,14 +11,14 @@ export const StarRating = ({ exactGuesses, closeGuesses }: StarRatingProps) => {
   
   const renderStars = () => {
     const stars = [];
-    const maxStars = 3; // Changed from 5 to 3
+    const maxStars = 3;
     
     // Add full stars
     for (let i = 0; i < Math.min(Math.floor(totalStars), maxStars); i++) {
       stars.push(
         <Star 
           key={`full-${i}`} 
-          className="text-vintage-accent" 
+          className="text-black" 
           fill="currentColor" 
           size={28} 
         />
@@ -30,7 +30,7 @@ export const StarRating = ({ exactGuesses, closeGuesses }: StarRatingProps) => {
       stars.push(
         <StarHalf 
           key="half" 
-          className="text-vintage-accent" 
+          className="text-black" 
           fill="currentColor" 
           size={28} 
         />
@@ -43,7 +43,7 @@ export const StarRating = ({ exactGuesses, closeGuesses }: StarRatingProps) => {
       stars.push(
         <Star 
           key={`empty-${i}`} 
-          className="text-muted-foreground" 
+          className="text-black/30" 
           size={28} 
         />
       );

@@ -99,14 +99,22 @@ export async function getUserTotalScore(userId: string) {
     };
   }
 
-  // Calculate total games played
-  const gamesPlayed = data.length;
+  // Calculate total games played - count distinct events
+  const uniqueEvents = new Set();
+  data.forEach(score => {
+    if (score.total_points > 0) {
+      uniqueEvents.add(score.event_id);
+    }
+  });
 
+  const gamesPlayed = uniqueEvents.size || data.length;
+
+  // Sum up the scores
   return data.reduce((acc, score) => {
     return {
-      totalPoints: acc.totalPoints + Number(score.total_points),
-      exactGuesses: acc.exactGuesses + score.exact_guesses,
-      closeGuesses: acc.closeGuesses + score.close_guesses,
+      totalPoints: acc.totalPoints + Number(score.total_points || 0),
+      exactGuesses: acc.exactGuesses + (score.exact_guesses || 0),
+      closeGuesses: acc.closeGuesses + (score.close_guesses || 0),
       gamesPlayed: gamesPlayed
     };
   }, {

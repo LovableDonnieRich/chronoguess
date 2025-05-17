@@ -30,85 +30,85 @@ export const GameResult = ({ event, yearGuess, monthGuess, dayGuess, onNextEvent
 
   const getResultIcon = (result: 'exact' | 'close' | 'wrong') => {
     switch (result) {
-      case 'exact': return <Check className="w-5 h-5 text-green-600" />;
-      case 'close': return <AlertCircle className="w-5 h-5 text-amber-600" />;
-      case 'wrong': return <X className="w-5 h-5 text-red-600" />;
+      case 'exact': return <Check className="w-5 h-5" />;
+      case 'close': return <AlertCircle className="w-5 h-5" />;
+      case 'wrong': return <X className="w-5 h-5" />;
     }
   };
 
   const getResultClass = (result: 'exact' | 'close' | 'wrong') => {
     switch (result) {
-      case 'exact': return 'bg-green-100 text-green-800 border-green-200';
-      case 'close': return 'bg-amber-100 text-amber-800 border-amber-200';
-      case 'wrong': return 'bg-red-100 text-red-800 border-red-200';
+      case 'exact': return 'bg-white border-4 border-black';
+      case 'close': return 'bg-white border-2 border-black';
+      case 'wrong': return 'bg-white border border-black';
     }
   };
 
   return (
-    <Card className="w-full max-w-md mx-auto overflow-hidden rounded-xl shadow-lg border-0 bg-white">
-      <CardHeader className="bg-gradient-to-r from-indigo-600 to-blue-500 text-white p-6">
-        <CardTitle className="text-2xl">{event.title}</CardTitle>
-        <CardDescription className="text-indigo-100 text-lg">
+    <Card className="w-full max-w-md mx-auto overflow-hidden border-4 border-black bg-white">
+      <CardHeader className="bg-black text-white p-6">
+        <CardTitle className="text-2xl font-mono uppercase">{event.title}</CardTitle>
+        <CardDescription className="text-white/80 font-mono uppercase text-lg">
           Result
         </CardDescription>
       </CardHeader>
       <CardContent className="p-6">
-        <p className="mb-6 text-gray-700">{event.description}</p>
+        <p className="mb-6 font-mono text-black/80">{event.description}</p>
         
         <div className="space-y-4">
-          <div className="flex justify-between items-center border-b border-indigo-100 pb-4">
-            <span className="text-lg font-medium text-gray-800">Correct date:</span>
-            <span className="font-semibold text-indigo-900 bg-indigo-50 px-3 py-1 rounded-md">
+          <div className="flex justify-between items-center border-b-2 border-black pb-4">
+            <span className="text-lg font-mono font-bold uppercase">Correct date:</span>
+            <span className="font-mono font-bold bg-black text-white px-3 py-1">
               {formatDate(event.date)}
             </span>
           </div>
           
           <div className="flex justify-between items-center mb-4">
-            <span className="text-gray-600">Your guess:</span>
-            <span className="font-medium text-gray-800">
+            <span className="font-mono uppercase">Your guess:</span>
+            <span className="font-mono font-bold">
               {dayGuess}/{monthGuess}/{yearGuess}
             </span>
           </div>
           
-          <div className="space-y-2 bg-gray-50 p-4 rounded-lg">
-            <div className={`flex justify-between items-center p-2 rounded-md border ${getResultClass(yearResult)}`}>
-              <span>Year:</span>
+          <div className="space-y-4 p-4 border-2 border-black">
+            <div className={`flex justify-between items-center p-2 ${getResultClass(yearResult)}`}>
+              <span className="font-mono uppercase">Year:</span>
               <div className="flex items-center gap-2">
-                <span className="font-semibold">{yearGuess}</span>
+                <span className="font-mono font-bold">{yearGuess}</span>
                 {getResultIcon(yearResult)}
               </div>
             </div>
             
-            <div className={`flex justify-between items-center p-2 rounded-md border ${getResultClass(monthResult)}`}>
-              <span>Month:</span>
+            <div className={`flex justify-between items-center p-2 ${getResultClass(monthResult)}`}>
+              <span className="font-mono uppercase">Month:</span>
               <div className="flex items-center gap-2">
-                <span className="font-semibold">{monthGuess}</span>
+                <span className="font-mono font-bold">{monthGuess}</span>
                 {getResultIcon(monthResult)}
               </div>
             </div>
             
-            <div className={`flex justify-between items-center p-2 rounded-md border ${getResultClass(dayResult)}`}>
-              <span>Day:</span>
+            <div className={`flex justify-between items-center p-2 ${getResultClass(dayResult)}`}>
+              <span className="font-mono uppercase">Day:</span>
               <div className="flex items-center gap-2">
-                <span className="font-semibold">{dayGuess}</span>
+                <span className="font-mono font-bold">{dayGuess}</span>
                 {getResultIcon(dayResult)}
               </div>
             </div>
           </div>
           
-          <div className="flex justify-between items-center border-t border-indigo-100 pt-4 mt-4">
-            <span className="text-lg font-semibold text-gray-800">Score:</span>
+          <div className="flex justify-between items-center border-t-2 border-black pt-4 mt-4">
+            <span className="text-lg font-mono font-bold uppercase">Score:</span>
             <div className="flex items-center gap-2">
               <StarRating exactGuesses={exactGuesses} closeGuesses={closeGuesses} />
-              <span className="text-lg font-semibold text-indigo-900">({points} pts)</span>
+              <span className="text-lg font-mono font-bold">({points} pts)</span>
             </div>
           </div>
         </div>
       </CardContent>
-      <CardFooter className="bg-gray-50 p-6 flex justify-end">
+      <CardFooter className="bg-black p-6 flex justify-end">
         <Button 
           onClick={onNextEvent}
-          className="bg-gradient-to-r from-indigo-600 to-blue-500 hover:from-indigo-700 hover:to-blue-600 text-white font-medium px-6 py-3 rounded-lg transition-transform hover:scale-105"
+          className="bg-white text-black border-2 border-white hover:bg-black hover:text-white font-mono uppercase"
         >
           Come back tomorrow
         </Button>

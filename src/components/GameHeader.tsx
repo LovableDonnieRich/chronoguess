@@ -9,21 +9,21 @@ interface GameHeaderProps {
 
 export const GameHeader = ({ score }: GameHeaderProps) => {
   return (
-    <header className="flex flex-col md:flex-row justify-between items-center p-6 mb-8 bg-white rounded-xl shadow-lg border border-indigo-100">
+    <header className="flex flex-col md:flex-row justify-between items-center p-6 mb-8 bg-white border-4 border-black">
       <div className="mb-4 md:mb-0 flex items-center">
-        <Calendar className="h-8 w-8 text-indigo-600 mr-3" />
+        <Calendar className="h-8 w-8 mr-3" />
         <div>
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-indigo-600 to-blue-500 bg-clip-text text-transparent">
+          <h1 className="text-3xl font-mono font-bold uppercase tracking-tight">
             ChronoGuess
           </h1>
-          <p className="text-gray-600">Guess when historical events happened</p>
+          <p className="text-sm text-black/70 uppercase tracking-tight">Guess when historical events happened</p>
         </div>
       </div>
       
       <div className="flex flex-col items-center md:items-end">
-        <div className="flex items-center gap-3 mb-1 bg-indigo-50 px-4 py-2 rounded-full">
-          <span className="text-indigo-800 font-medium">Your score:</span>
-          <span className="font-bold text-indigo-900 text-xl">{score.totalPoints}</span>
+        <div className="flex items-center gap-3 mb-1 bg-black text-white px-4 py-2">
+          <span className="font-mono uppercase text-sm">Your score:</span>
+          <span className="font-mono font-bold text-xl">{score.totalPoints}</span>
         </div>
         <div className="flex items-center">
           <StarRating 
@@ -34,4 +34,4 @@ export const GameHeader = ({ score }: GameHeaderProps) => {
       </div>
     </header>
   );
-};
+}

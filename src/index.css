@@ -5,44 +5,35 @@
 
 @layer base {
   :root {
-    --background: 36 43% 97%;
-    --foreground: 30 75% 13%;
+    --background: 0 0% 100%;
+    --foreground: 0 0% 0%;
 
-    --card: 36 40% 92%;
-    --card-foreground: 30 75% 13%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 0%;
 
-    --popover: 36 40% 97%;
-    --popover-foreground: 30 75% 13%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 0%;
 
-    --primary: 35 58% 62%;
-    --primary-foreground: 30 90% 3%;
+    --primary: 0 0% 0%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 36 20% 86%;
-    --secondary-foreground: 30 75% 13%;
+    --secondary: 0 0% 92%;
+    --secondary-foreground: 0 0% 0%;
 
-    --muted: 36 20% 86%;
-    --muted-foreground: 30 25% 35%;
+    --muted: 0 0% 92%;
+    --muted-foreground: 0 0% 40%;
 
-    --accent: 35 58% 62%;
-    --accent-foreground: 30 90% 3%;
+    --accent: 0 0% 0%;
+    --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 100% 50%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 30 25% 80%;
-    --input: 30 25% 80%;
-    --ring: 35 58% 55%;
+    --border: 0 0% 0%;
+    --input: 0 0% 0%;
+    --ring: 0 0% 0%;
 
-    --radius: 0.5rem;
-
-    --sidebar-background: 36 43% 97%;
-    --sidebar-foreground: 30 75% 13%;
-    --sidebar-primary: 35 58% 62%;
-    --sidebar-primary-foreground: 30 90% 3%;
-    --sidebar-accent: 36 20% 86%;
-    --sidebar-accent-foreground: 30 75% 13%;
-    --sidebar-border: 30 25% 80%;
-    --sidebar-ring: 35 58% 55%;
+    --radius: 0rem;
   }
 }
 
@@ -52,12 +43,12 @@
   }
 
   body {
-    @apply bg-vintage-background text-vintage-text;
+    @apply bg-white text-black;
     font-family: 'Lora', serif;
   }
 
   h1, h2, h3, h4, h5, h6 {
-    @apply font-serif;
+    @apply font-mono uppercase;
   }
 }
 
@@ -67,23 +58,44 @@
 }
 
 ::-webkit-scrollbar-track {
-  @apply bg-vintage-paper/50;
+  @apply bg-white;
 }
 
 ::-webkit-scrollbar-thumb {
-  @apply bg-vintage-accent/60 rounded-full;
+  @apply bg-black rounded-none;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  @apply bg-vintage-accent/80;
+  @apply bg-black/80;
 }
 
 /* Game specific styles */
 .historical-card {
-  @apply relative overflow-hidden transition-all duration-300 ease-in-out;
-  box-shadow: 0 4px 12px rgba(62, 46, 30, 0.1);
+  @apply relative overflow-hidden border-4 border-black transition-all duration-300 ease-in-out;
+  box-shadow: 8px 8px 0px rgba(0, 0, 0, 1);
 }
 
 .historical-card:hover {
-  box-shadow: 0 8px 24px rgba(62, 46, 30, 0.15);
+  box-shadow: 12px 12px 0px rgba(0, 0, 0, 1);
+}
+
+/* Brutalist animations */
+@keyframes scale-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-scale-in {
+  animation: scale-in 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+}
+
+/* Black & white brutalist button styling */
+button {
+  @apply transition-transform active:scale-95;
 }

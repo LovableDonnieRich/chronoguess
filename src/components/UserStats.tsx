@@ -25,7 +25,7 @@ export function UserStats() {
           totalPoints: userScores.totalPoints,
           exactGuesses: userScores.exactGuesses,
           closeGuesses: userScores.closeGuesses,
-          gamesPlayed: userScores.exactGuesses + userScores.closeGuesses > 0 ? 1 : 0 // This will be improved later when we track games played
+          gamesPlayed: userScores.gamesPlayed
         });
       } catch (error) {
         console.error("Error fetching user stats:", error);
@@ -38,31 +38,31 @@ export function UserStats() {
   }, [user]);
 
   if (loading) {
-    return <div className="animate-pulse h-24 bg-slate-200 rounded-lg"></div>;
+    return <div className="animate-pulse h-24 bg-black/10 rounded-lg"></div>;
   }
 
   return (
-    <Card>
-      <CardHeader className="pb-2">
-        <CardTitle className="text-xl">Your Stats</CardTitle>
+    <Card className="border-black/30 bg-white">
+      <CardHeader className="pb-2 border-b border-black/20">
+        <CardTitle className="text-xl font-mono uppercase">Your Stats</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-4 mt-2">
           <div className="flex flex-col">
-            <span className="text-2xl font-bold text-indigo-600">{stats.totalPoints}</span>
-            <span className="text-sm text-muted-foreground">Total Points</span>
+            <span className="text-2xl font-mono font-bold">{stats.totalPoints}</span>
+            <span className="text-sm text-black/70 uppercase tracking-tight">Total Points</span>
           </div>
           <div className="flex flex-col">
-            <span className="text-2xl font-bold text-green-600">{stats.exactGuesses}</span>
-            <span className="text-sm text-muted-foreground">Exact Guesses</span>
+            <span className="text-2xl font-mono font-bold">{stats.exactGuesses}</span>
+            <span className="text-sm text-black/70 uppercase tracking-tight">Exact Guesses</span>
           </div>
           <div className="flex flex-col">
-            <span className="text-2xl font-bold text-amber-600">{stats.closeGuesses}</span>
-            <span className="text-sm text-muted-foreground">Close Guesses</span>
+            <span className="text-2xl font-mono font-bold">{stats.closeGuesses}</span>
+            <span className="text-sm text-black/70 uppercase tracking-tight">Close Guesses</span>
           </div>
           <div className="flex flex-col">
-            <span className="text-2xl font-bold text-blue-600">{stats.gamesPlayed}</span>
-            <span className="text-sm text-muted-foreground">Games Played</span>
+            <span className="text-2xl font-mono font-bold">{stats.gamesPlayed}</span>
+            <span className="text-sm text-black/70 uppercase tracking-tight">Games Played</span>
           </div>
         </div>
       </CardContent>
