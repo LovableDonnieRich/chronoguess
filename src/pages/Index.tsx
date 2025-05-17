@@ -1,11 +1,12 @@
-
 import { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { YearGuess } from "@/components/YearGuess";
 import { MonthGuess } from "@/components/MonthGuess";
 import { DayGuess } from "@/components/DayGuess";
 import { GameResult } from "@/components/GameResult";
 import { GameHeader } from "@/components/GameHeader";
+import { GameNav } from "@/components/GameNav";
+import { UserStats } from "@/components/UserStats";
 import { 
   getTodaysEvent,
   evaluateGuess, 
@@ -280,7 +281,8 @@ const Index = () => {
   }
   
   if (!user) {
-    return <Navigate to="/auth" replace />;
+    navigate("/auth");
+    return null;
   }
   
   if (!gameState.currentEvent) {
@@ -299,6 +301,10 @@ const Index = () => {
   return (
     <div className="min-h-screen py-8 px-4 bg-gradient-to-b from-blue-50 to-indigo-100">
       <div className="container mx-auto max-w-4xl">
+        <GameNav />
+        <div className="mb-6">
+          <UserStats />
+        </div>
         <GameHeader score={gameState.score} />
         
         {hasPlayedToday(gameState.lastPlayedDate) && gameState.guessStage === 'result' && (

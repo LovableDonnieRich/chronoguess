@@ -94,20 +94,26 @@ export async function getUserTotalScore(userId: string) {
     return {
       totalPoints: 0,
       exactGuesses: 0,
-      closeGuesses: 0
+      closeGuesses: 0,
+      gamesPlayed: 0
     };
   }
+
+  // Calculate total games played
+  const gamesPlayed = data.length;
 
   return data.reduce((acc, score) => {
     return {
       totalPoints: acc.totalPoints + Number(score.total_points),
       exactGuesses: acc.exactGuesses + score.exact_guesses,
-      closeGuesses: acc.closeGuesses + score.close_guesses
+      closeGuesses: acc.closeGuesses + score.close_guesses,
+      gamesPlayed: gamesPlayed
     };
   }, {
     totalPoints: 0,
     exactGuesses: 0,
-    closeGuesses: 0
+    closeGuesses: 0,
+    gamesPlayed: 0
   });
 }
 

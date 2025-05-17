@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 const Auth = () => {
   const { user, isLoading, signIn, signUp } = useAuth();
@@ -17,7 +18,7 @@ const Auth = () => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [activeTab, setActiveTab] = useState<"login" | "signup">("login");
+  const [activeTab, setActiveTab] = useState<"login" | "signup" | "reset">("login");
 
   if (isLoading) {
     return (
@@ -28,7 +29,7 @@ const Auth = () => {
   }
 
   if (user) {
-    return <Navigate to="/" replace />;
+    return <Navigate to="/" />;
   }
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -113,6 +114,41 @@ const Auth = () => {
     setActiveTab("login");
   };
 
+  const handlePasswordReset = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!email) {
+      toast({
+        title: "Error",
+        description: "Please enter your email address",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    setIsSubmitting(true);
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: window.location.origin + "/auth",
+    });
+    setIsSubmitting(false);
+    
+    if (error) {
+      toast({
+        title: "Password reset failed",
+        description: error.message,
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    toast({
+      title: "Password reset email sent",
+      description: "Check your email for a password reset link",
+    });
+    
+    setActiveTab("login");
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-blue-50 to-indigo-100 p-4">
       <Card className="w-full max-w-md">
@@ -123,10 +159,11 @@ const Auth = () => {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as "login" | "signup")}>
-            <TabsList className="grid w-full grid-cols-2 mb-6">
+          <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as "login" | "signup" | "reset")}>
+            <TabsList className="grid w-full grid-cols-3 mb-6">
               <TabsTrigger value="login">Login</TabsTrigger>
               <TabsTrigger value="signup">Sign Up</TabsTrigger>
+              <TabsTrigger value="reset">Reset</TabsTrigger>
             </TabsList>
             
             <TabsContent value="login">
@@ -157,6 +194,15 @@ const Auth = () => {
                 >
                   {isSubmitting ? "Signing in..." : "Sign In"}
                 </Button>
+                <div className="text-center text-sm">
+                  <button 
+                    type="button"
+                    onClick={() => setActiveTab("reset")} 
+                    className="text-indigo-600 hover:text-indigo-800 underline"
+                  >
+                    Forgot your password?
+                  </button>
+                </div>
               </form>
             </TabsContent>
             
@@ -197,6 +243,37 @@ const Auth = () => {
                 >
                   {isSubmitting ? "Creating Account..." : "Create Account"}
                 </Button>
+              </form>
+            </TabsContent>
+
+            <TabsContent value="reset">
+              <form onSubmit={handlePasswordReset} className="space-y-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Email</label>
+                  <Input
+                    type="email"
+                    placeholder="name@example.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                  />
+                </div>
+                <Button 
+                  type="submit" 
+                  className="w-full bg-indigo-600 hover:bg-indigo-700" 
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? "Sending Reset Email..." : "Send Reset Link"}
+                </Button>
+                <div className="text-center text-sm">
+                  <button 
+                    type="button"
+                    onClick={() => setActiveTab("login")} 
+                    className="text-indigo-600 hover:text-indigo-800 underline"
+                  >
+                    Back to login
+                  </button>
+                </div>
               </form>
             </TabsContent>
           </Tabs>
