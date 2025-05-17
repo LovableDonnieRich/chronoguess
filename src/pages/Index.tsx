@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { YearGuess } from "@/components/YearGuess";
@@ -7,6 +8,7 @@ import { GameResult } from "@/components/GameResult";
 import { GameHeader } from "@/components/GameHeader";
 import { GameNav } from "@/components/GameNav";
 import { UserStats } from "@/components/UserStats";
+import { Footer } from "@/components/Footer";
 import { 
   getTodaysEvent,
   evaluateGuess, 
@@ -287,20 +289,21 @@ const Index = () => {
   
   if (!gameState.currentEvent) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-blue-50 to-indigo-100">
+      <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-blue-50 to-indigo-100">
         <Button 
           onClick={() => startNewGame()}
           className="bg-indigo-600 hover:bg-indigo-700 text-white text-lg p-6 rounded-xl shadow-lg transition-transform hover:scale-105"
         >
           Start game
         </Button>
+        <Footer />
       </div>
     );
   }
   
   return (
-    <div className="min-h-screen py-8 px-4 bg-gradient-to-b from-blue-50 to-indigo-100">
-      <div className="container mx-auto max-w-4xl">
+    <div className="min-h-screen py-8 px-4 bg-gradient-to-b from-blue-50 to-indigo-100 flex flex-col">
+      <div className="container mx-auto max-w-4xl flex-1">
         <GameNav />
         <div className="mb-6">
           <UserStats />
@@ -357,6 +360,7 @@ const Index = () => {
           )}
         </div>
       </div>
+      <Footer />
     </div>
   );
 };

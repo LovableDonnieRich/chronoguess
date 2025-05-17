@@ -150,7 +150,7 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-blue-50 to-indigo-100 p-4">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-blue-50 to-indigo-100 p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl font-bold text-center">ChronoGuess</CardTitle>
@@ -279,6 +279,14 @@ const Auth = () => {
           </Tabs>
         </CardContent>
         <CardFooter className="flex flex-col items-center justify-center pt-0">
+          <div className="flex justify-center space-x-4 mt-4">
+            <div dangerouslySetInnerHTML={{ 
+              __html: `<a href="https://www.iubenda.com/privacy-policy/15893592" class="iubenda-white iubenda-noiframe iubenda-embed iubenda-noiframe" title="Privacy Policy">Privacy Policy</a><script type="text/javascript">(function (w,d) {var loader = function () {var s = d.createElement("script"), tag = d.getElementsByTagName("script")[0]; s.src="https://cdn.iubenda.com/iubenda.js"; tag.parentNode.insertBefore(s,tag);}; if(w.addEventListener){w.addEventListener("load", loader, false);}else if(w.attachEvent){w.attachEvent("onload", loader);}else{w.onload = loader;}})(window, document);</script>`
+            }} />
+            <div dangerouslySetInnerHTML={{ 
+              __html: `<a href="https://www.iubenda.com/privacy-policy/15893592/cookie-policy" class="iubenda-white iubenda-noiframe iubenda-embed iubenda-noiframe" title="Cookie Policy">Cookie Policy</a><script type="text/javascript">(function (w,d) {var loader = function () {var s = d.createElement("script"), tag = d.getElementsByTagName("script")[0]; s.src="https://cdn.iubenda.com/iubenda.js"; tag.parentNode.insertBefore(s,tag);}; if(w.addEventListener){w.addEventListener("load", loader, false);}else if(w.attachEvent){w.attachEvent("onload", loader);}else{w.onload = loader;}})(window, document);</script>`
+            }} />
+          </div>
           <p className="text-xs text-center text-gray-500 mt-4">
             By continuing, you agree to our Terms of Service and Privacy Policy.
           </p>
