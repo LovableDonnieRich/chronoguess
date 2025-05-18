@@ -2,6 +2,20 @@
 import { supabase } from "@/integrations/supabase/client";
 import { HistoricalEvent } from "./game-utils";
 
+// Define a GameStateType to avoid circular references
+export type GameStateType = {
+  year_guess: number | null;
+  month_guess: number | null;
+  day_guess: number | null;
+  year_accuracy: string | null;
+  month_accuracy: string | null;
+  day_accuracy: string | null;
+  played_at: string | null;
+  total_points: number;
+  exact_guesses: number;
+  close_guesses: number;
+};
+
 // Save event to database to avoid duplication
 export async function saveEventToDatabase(event: HistoricalEvent) {
   const { data, error } = await supabase
@@ -101,7 +115,8 @@ export async function saveUserScore(
       day_accuracy: dayAccuracy,
       total_points: totalPoints,
       exact_guesses: exactGuesses,
-      close_guesses: closeGuesses
+      close_guesses: closeGuesses,
+      played_at: new Date().toISOString()
     })
     .select()
     .single();
@@ -158,20 +173,22 @@ export async function getUserTotalScore(userId: string) {
 }
 
 // Check if user has played a specific event
-export async function hasUserPlayedEvent(userId: string, eventId: string) {
+export async function hasUserPlayedEvent(userId: string, eventId: string): Promise<boolean> {
   const { data, error } = await supabase
     .from('user_scores')
-    .select('id')
+    .select('id, day_guess')
     .eq('user_id', userId)
     .eq('event_id', eventId)
-    .single();
+    .maybeSingle();
 
-  if (error && error.code !== 'PGRST116') { // No rows returned
-    console.error('Error checking user played event:', error);
+  if (error) {
+    console.error('Error checking if user played event:', error);
     return false;
   }
 
-  return !!data;
+  // Consider the event fully played only if day_guess is not null
+  // This handles the case where they might have started the game but not completed it
+  return !!data && data.day_guess !== null;
 }
 
 // Get last played date for user
@@ -195,20 +212,6 @@ export async function getLastPlayedDate(userId: string) {
   return data?.played_at ? data.played_at.split('T')[0] : null;
 }
 
-// Define a GameStateType to avoid circular references
-export type GameStateType = {
-  year_guess: number | null;
-  month_guess: number | null;
-  day_guess: number | null;
-  year_accuracy: string | null;
-  month_accuracy: string | null;
-  day_accuracy: string | null;
-  played_at: string | null;
-  total_points: number;
-  exact_guesses: number;
-  close_guesses: number;
-};
-
 // Get current game state for user
 export async function getCurrentGameState(userId: string, eventId: string): Promise<GameStateType | null> {
   const { data, error } = await supabase
@@ -227,16 +230,15 @@ export async function getCurrentGameState(userId: string, eventId: string): Prom
     `)
     .eq('user_id', userId)
     .eq('event_id', eventId)
-    .single();
+    .maybeSingle();
 
   if (error) {
-    if (error.code === 'PGRST116') { // No rows returned
-      return null;
-    }
     console.error('Error getting current game state:', error);
     return null;
   }
 
+  if (!data) return null;
+  
   return data as GameStateType;
 }
 

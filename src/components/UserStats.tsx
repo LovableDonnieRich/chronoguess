@@ -4,7 +4,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/contexts/AuthContext";
 import { getUserTotalScore } from "@/lib/supabase-utils";
 
-export function UserStats() {
+interface UserStatsProps {
+  refreshTrigger?: number; // Optional prop that triggers a refresh when it changes
+}
+
+export function UserStats({ refreshTrigger }: UserStatsProps) {
   const { user } = useAuth();
   const [stats, setStats] = useState({
     totalPoints: 0,
@@ -35,7 +39,7 @@ export function UserStats() {
     };
 
     fetchStats();
-  }, [user]);
+  }, [user, refreshTrigger]); // Re-fetch when user or refreshTrigger changes
 
   if (loading) {
     return <div className="animate-pulse h-24 bg-black/10 rounded-lg"></div>;
