@@ -210,7 +210,7 @@ const Index = () => {
     
     const updatedGameState = {
       ...gameState,
-      guessStage: 'month',
+      guessStage: 'month' as const, // Fix: Use 'as const' to satisfy TypeScript
       yearGuess: year,
       score: newScore,
     };
@@ -270,7 +270,7 @@ const Index = () => {
     
     const updatedGameState = {
       ...gameState,
-      guessStage: 'day',
+      guessStage: 'day' as const, // Fix: Use 'as const' to satisfy TypeScript
       monthGuess: month,
       score: newScore,
     };

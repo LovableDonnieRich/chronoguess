@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { HistoricalEvent } from "./game-utils";
 
@@ -237,9 +236,7 @@ export async function getCurrentGameState(userId: string, eventId: string): Prom
     return null;
   }
 
-  if (!data) return null;
-  
-  return data as GameStateType;
+  return data as GameStateType | null;
 }
 
 // Save game state to database
@@ -247,7 +244,7 @@ export async function saveGameState(
   userId: string, 
   eventId: string, 
   gameState: {
-    guessStage: string;
+    guessStage: 'year' | 'month' | 'day' | 'result';
     yearGuess: number | null;
     monthGuess: number | null;
     dayGuess: number | null;
