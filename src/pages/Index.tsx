@@ -76,7 +76,6 @@ const Index = () => {
           // If user has progress, set the game state accordingly
           if (currentGameState) {
             console.log("Found current game state:", currentGameState);
-            const eventDate = new Date(currentGameState.events.event_date);
             
             // Determine the guess stage
             let guessStage: 'year' | 'month' | 'day' | 'result' = 'year';
@@ -96,11 +95,11 @@ const Index = () => {
             setGameState({
               currentEvent: {
                 id: todaysEvent.id,
-                title: currentGameState.events.title,
-                description: currentGameState.events.description,
-                date: eventDate,
-                category: currentGameState.events.category,
-                difficulty: currentGameState.events.difficulty as 'easy' | 'medium' | 'hard',
+                title: todaysEvent.title,
+                description: todaysEvent.description,
+                date: todaysEvent.date,
+                category: todaysEvent.category,
+                difficulty: todaysEvent.difficulty
               },
               score: {
                 exactGuesses: userScore.exactGuesses,

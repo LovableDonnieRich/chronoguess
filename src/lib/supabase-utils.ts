@@ -195,8 +195,22 @@ export async function getLastPlayedDate(userId: string) {
   return data?.played_at ? data.played_at.split('T')[0] : null;
 }
 
+// Define a GameStateType to avoid circular references
+export type GameStateType = {
+  year_guess: number | null;
+  month_guess: number | null;
+  day_guess: number | null;
+  year_accuracy: string | null;
+  month_accuracy: string | null;
+  day_accuracy: string | null;
+  played_at: string | null;
+  total_points: number;
+  exact_guesses: number;
+  close_guesses: number;
+};
+
 // Get current game state for user
-export async function getCurrentGameState(userId: string, eventId: string) {
+export async function getCurrentGameState(userId: string, eventId: string): Promise<GameStateType | null> {
   const { data, error } = await supabase
     .from('user_scores')
     .select(`
