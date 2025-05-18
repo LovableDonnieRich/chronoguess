@@ -147,7 +147,7 @@ export async function getUserTotalScore(userId: string) {
       totalPoints: acc.totalPoints + Number(score.total_points || 0),
       exactGuesses: acc.exactGuesses + (score.exact_guesses || 0),
       closeGuesses: acc.closeGuesses + (score.close_guesses || 0),
-      gamesPlayed: gamesPlayed
+      gamesPlayed
     };
   }, {
     totalPoints: 0,
@@ -174,7 +174,7 @@ export async function hasUserPlayedEvent(userId: string, eventId: string) {
   return !!data;
 }
 
-// Get last played event for user
+// Get last played date for user
 export async function getLastPlayedDate(userId: string) {
   const { data, error } = await supabase
     .from('user_scores')
@@ -207,7 +207,9 @@ export async function getCurrentGameState(userId: string, eventId: string) {
       month_accuracy, 
       day_accuracy,
       played_at,
-      events (*)
+      total_points,
+      exact_guesses,
+      close_guesses
     `)
     .eq('user_id', userId)
     .eq('event_id', eventId)
@@ -222,4 +224,72 @@ export async function getCurrentGameState(userId: string, eventId: string) {
   }
 
   return data;
+}
+
+// Save game state to database
+export async function saveGameState(
+  userId: string, 
+  eventId: string, 
+  gameState: {
+    guessStage: string;
+    yearGuess: number | null;
+    monthGuess: number | null;
+    dayGuess: number | null;
+    yearAccuracy?: string;
+    monthAccuracy?: string;
+    dayAccuracy?: string;
+    totalPoints?: number;
+    exactGuesses?: number;
+    closeGuesses?: number;
+  }
+) {
+  // Check if a record already exists
+  const existing = await getCurrentGameState(userId, eventId);
+
+  const updateData = {
+    user_id: userId,
+    event_id: eventId,
+    year_guess: gameState.yearGuess,
+    month_guess: gameState.monthGuess,
+    day_guess: gameState.dayGuess,
+    year_accuracy: gameState.yearAccuracy,
+    month_accuracy: gameState.monthAccuracy,
+    day_accuracy: gameState.dayAccuracy,
+    played_at: new Date().toISOString(),
+    total_points: gameState.totalPoints || 0,
+    exact_guesses: gameState.exactGuesses || 0,
+    close_guesses: gameState.closeGuesses || 0
+  };
+
+  if (existing) {
+    // Update existing record
+    const { data, error } = await supabase
+      .from('user_scores')
+      .update(updateData)
+      .eq('user_id', userId)
+      .eq('event_id', eventId)
+      .select()
+      .single();
+      
+    if (error) {
+      console.error('Error updating game state:', error);
+      return null;
+    }
+    
+    return data;
+  } else {
+    // Insert new record
+    const { data, error } = await supabase
+      .from('user_scores')
+      .insert(updateData)
+      .select()
+      .single();
+      
+    if (error) {
+      console.error('Error saving game state:', error);
+      return null;
+    }
+    
+    return data;
+  }
 }
