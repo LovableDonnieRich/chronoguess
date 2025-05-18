@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { YearGuess } from "@/components/YearGuess";
@@ -151,12 +152,12 @@ const Index = () => {
         console.log("User score for new game:", userScore);
       }
       
-      // Fix: remove 'as const' and use explicit GuessStage type
+      // Fix: use explicit literal type instead of removing 'as const'
       setGameState({
         ...initialGameState,
         currentEvent: todaysEvent,
         lastPlayedDate: today,
-        guessStage: alreadyPlayed ? 'result' : 'year',
+        guessStage: alreadyPlayed ? 'result' : 'year', // Explicitly using literal type
         score: {
           exactGuesses: userScore.exactGuesses,
           closeGuesses: userScore.closeGuesses,
@@ -207,10 +208,10 @@ const Index = () => {
       });
     }
     
-    // Fix: Remove 'as const' here
-    const updatedGameState = {
+    // Fix: Use explicit literal type instead of string
+    const updatedGameState: GameState = {
       ...gameState,
-      guessStage: 'month',
+      guessStage: 'month', // Correctly typed as literal
       yearGuess: year,
       score: newScore,
     };
@@ -268,10 +269,10 @@ const Index = () => {
       });
     }
     
-    // Fix: Remove 'as const' here
-    const updatedGameState = {
+    // Fix: Use explicit literal type instead of string
+    const updatedGameState: GameState = {
       ...gameState,
-      guessStage: 'day',
+      guessStage: 'day', // Correctly typed as literal
       monthGuess: month,
       score: newScore,
     };
