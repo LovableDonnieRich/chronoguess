@@ -14,15 +14,19 @@ import {
   evaluateGuess, 
   GameState, 
   initialGameState,
-  saveGameState,
-  loadGameState,
   hasPlayedToday
 } from "@/lib/game-utils";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
-import { saveUserScore, getUserTotalScore, hasUserPlayedEvent } from "@/lib/supabase-utils";
+import { 
+  saveUserScore, 
+  getUserTotalScore, 
+  hasUserPlayedEvent, 
+  getLastPlayedDate,
+  getCurrentGameState
+} from "@/lib/supabase-utils";
 
 const Index = () => {
   const [gameState, setGameState] = useState<GameState>(initialGameState);
@@ -43,35 +47,73 @@ const Index = () => {
       }
       
       setLoading(true);
-      const savedState = loadGameState();
       
-      if (savedState && hasPlayedToday(savedState.lastPlayedDate)) {
-        // Update score for returning users
-        if (user) {
-          const userScore = await getUserTotalScore(user.id);
-          savedState.score = {
-            exactGuesses: userScore.exactGuesses,
-            closeGuesses: userScore.closeGuesses,
-            totalPoints: userScore.totalPoints
-          };
-        }
+      // Get the last played date from database
+      const lastPlayedDate = await getLastPlayedDate(user.id);
+      
+      if (lastPlayedDate && hasPlayedToday(lastPlayedDate)) {
+        // Get the current event and user's progress from the database
+        const todaysEvent = await getTodaysEvent();
         
-        setGameState(savedState);
+        // Get user's total score
+        const userScore = await getUserTotalScore(user.id);
+        
+        // Get current game state
+        const currentGameState = await getCurrentGameState(user.id, todaysEvent.id);
+        
+        // If user has progress, set the game state accordingly
+        if (currentGameState) {
+          const eventDate = new Date(currentGameState.events.event_date);
+          
+          // Determine the guess stage
+          let guessStage: 'year' | 'month' | 'day' | 'result' = 'year';
+          
+          if (currentGameState.year_guess !== null) {
+            guessStage = 'month';
+            
+            if (currentGameState.month_guess !== null) {
+              guessStage = 'day';
+              
+              if (currentGameState.day_guess !== null) {
+                guessStage = 'result';
+              }
+            }
+          }
+          
+          setGameState({
+            currentEvent: {
+              id: todaysEvent.id,
+              title: currentGameState.events.title,
+              description: currentGameState.events.description,
+              date: eventDate,
+              category: currentGameState.events.category,
+              difficulty: currentGameState.events.difficulty as 'easy' | 'medium' | 'hard',
+            },
+            score: {
+              exactGuesses: userScore.exactGuesses,
+              closeGuesses: userScore.closeGuesses,
+              totalPoints: userScore.totalPoints
+            },
+            guessStage: guessStage,
+            yearGuess: currentGameState.year_guess,
+            monthGuess: currentGameState.month_guess,
+            dayGuess: currentGameState.day_guess,
+            lastPlayedDate: lastPlayedDate
+          });
+        } else {
+          // No progress found, but it's the same day, start a new game
+          await startNewGame();
+        }
       } else {
+        // Different day or never played, start a new game
         await startNewGame();
       }
+      
       setLoading(false);
     };
     
     initGame();
   }, [authLoading, user]);
-  
-  // Save game state whenever it changes
-  useEffect(() => {
-    if (gameState.currentEvent) {
-      saveGameState(gameState);
-    }
-  }, [gameState]);
   
   const startNewGame = async () => {
     setLoading(true);
@@ -195,7 +237,7 @@ const Index = () => {
   };
   
   const handleDayGuess = async (day: number) => {
-    if (!gameState.currentEvent) return;
+    if (!gameState.currentEvent || !user) return;
     
     const actualDay = gameState.currentEvent.date.getDate();
     const dayResult = evaluateGuess(day, actualDay, 'day');
@@ -276,8 +318,8 @@ const Index = () => {
   
   if (loading || authLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-blue-50 to-indigo-100">
-        <div className="text-indigo-600 text-xl">Loading...</div>
+      <div className="min-h-screen flex items-center justify-center bg-black">
+        <div className="text-white text-xl">Loading...</div>
       </div>
     );
   }
@@ -289,10 +331,10 @@ const Index = () => {
   
   if (!gameState.currentEvent) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-blue-50 to-indigo-100">
+      <div className="min-h-screen flex flex-col items-center justify-center bg-black">
         <Button 
           onClick={() => startNewGame()}
-          className="bg-indigo-600 hover:bg-indigo-700 text-white text-lg p-6 rounded-xl shadow-lg transition-transform hover:scale-105"
+          className="bg-white hover:bg-gray-200 text-black text-lg p-6 rounded-none border-4 border-white shadow-lg transition-transform hover:scale-105 font-mono uppercase"
         >
           Start game
         </Button>
@@ -302,7 +344,7 @@ const Index = () => {
   }
   
   return (
-    <div className="min-h-screen py-8 px-4 bg-gradient-to-b from-blue-50 to-indigo-100 flex flex-col">
+    <div className="min-h-screen py-8 px-4 bg-black flex flex-col">
       <div className="container mx-auto max-w-4xl flex-1">
         <GameNav />
         <div className="mb-6">
@@ -311,9 +353,9 @@ const Index = () => {
         <GameHeader score={gameState.score} />
         
         {hasPlayedToday(gameState.lastPlayedDate) && gameState.guessStage === 'result' && (
-          <Alert className="mb-6 bg-blue-50 border-blue-200">
-            <AlertTitle className="text-blue-800">Daily event completed!</AlertTitle>
-            <AlertDescription className="text-blue-600">
+          <Alert className="mb-6 bg-white border-4 border-black rounded-none">
+            <AlertTitle className="text-black font-mono uppercase">Daily event completed!</AlertTitle>
+            <AlertDescription className="text-black font-mono">
               You've already played today's event. Come back tomorrow for a new historical event!
             </AlertDescription>
           </Alert>

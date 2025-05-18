@@ -173,27 +173,3 @@ export function getMonthName(month: number): string {
   date.setMonth(month - 1);
   return new Intl.DateTimeFormat('en-US', { month: 'long' }).format(date);
 }
-
-// Save game state to localStorage
-export function saveGameState(state: GameState): void {
-  localStorage.setItem('chronoguess-game-state', JSON.stringify(state));
-}
-
-// Load game state from localStorage
-export function loadGameState(): GameState | null {
-  const savedState = localStorage.getItem('chronoguess-game-state');
-  if (savedState) {
-    const state = JSON.parse(savedState);
-    // Convert date string back to Date object
-    if (state.currentEvent?.date) {
-      state.currentEvent.date = new Date(state.currentEvent.date);
-    }
-    return state;
-  }
-  return null;
-}
-
-// Clear game state from localStorage
-export function clearGameState(): void {
-  localStorage.removeItem('chronoguess-game-state');
-}

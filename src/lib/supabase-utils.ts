@@ -86,7 +86,7 @@ export async function saveUserScore(
 export async function getUserTotalScore(userId: string) {
   const { data, error } = await supabase
     .from('user_scores')
-    .select('total_points, exact_guesses, close_guesses')
+    .select('total_points, exact_guesses, close_guesses, event_id')
     .eq('user_id', userId);
 
   if (error) {
@@ -107,7 +107,7 @@ export async function getUserTotalScore(userId: string) {
     }
   });
 
-  const gamesPlayed = uniqueEvents.size || data.length;
+  const gamesPlayed = uniqueEvents.size || 0;
 
   // Sum up the scores
   return data.reduce((acc, score) => {
@@ -140,4 +140,54 @@ export async function hasUserPlayedEvent(userId: string, eventId: string) {
   }
 
   return !!data;
+}
+
+// Get last played event for user
+export async function getLastPlayedDate(userId: string) {
+  const { data, error } = await supabase
+    .from('user_scores')
+    .select('played_at')
+    .eq('user_id', userId)
+    .order('played_at', { ascending: false })
+    .limit(1)
+    .single();
+
+  if (error) {
+    if (error.code === 'PGRST116') { // No rows returned
+      return null;
+    }
+    console.error('Error getting last played date:', error);
+    return null;
+  }
+
+  return data?.played_at ? data.played_at.split('T')[0] : null;
+}
+
+// Get current game state for user
+export async function getCurrentGameState(userId: string, eventId: string) {
+  const { data, error } = await supabase
+    .from('user_scores')
+    .select(`
+      year_guess, 
+      month_guess, 
+      day_guess, 
+      year_accuracy, 
+      month_accuracy, 
+      day_accuracy,
+      played_at,
+      events (*)
+    `)
+    .eq('user_id', userId)
+    .eq('event_id', eventId)
+    .single();
+
+  if (error) {
+    if (error.code === 'PGRST116') { // No rows returned
+      return null;
+    }
+    console.error('Error getting current game state:', error);
+    return null;
+  }
+
+  return data;
 }
