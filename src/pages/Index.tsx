@@ -93,7 +93,7 @@ const Index = () => {
                 closeGuesses: userScore.closeGuesses,
                 totalPoints: userScore.totalPoints
               },
-              guessStage: 'result' as const, // Use 'as const' to fix TypeScript error
+              guessStage: 'result', // Use 'as const' to fix TypeScript error
               yearGuess: currentGameState.year_guess,
               monthGuess: currentGameState.month_guess,
               dayGuess: currentGameState.day_guess,
@@ -151,12 +151,12 @@ const Index = () => {
         console.log("User score for new game:", userScore);
       }
       
+      // Fix: remove 'as const' and use explicit GuessStage type
       setGameState({
         ...initialGameState,
         currentEvent: todaysEvent,
         lastPlayedDate: today,
-        // If already played, set guessStage to 'result' to prevent playing again
-        guessStage: (alreadyPlayed ? 'result' : 'year') as const, // Use 'as const' to fix TypeScript error
+        guessStage: alreadyPlayed ? 'result' : 'year',
         score: {
           exactGuesses: userScore.exactGuesses,
           closeGuesses: userScore.closeGuesses,
@@ -207,9 +207,10 @@ const Index = () => {
       });
     }
     
+    // Fix: Remove 'as const' here
     const updatedGameState = {
       ...gameState,
-      guessStage: 'month' as const, // Fix: Use 'as const' to satisfy TypeScript
+      guessStage: 'month',
       yearGuess: year,
       score: newScore,
     };
@@ -267,9 +268,10 @@ const Index = () => {
       });
     }
     
+    // Fix: Remove 'as const' here
     const updatedGameState = {
       ...gameState,
-      guessStage: 'day' as const, // Fix: Use 'as const' to satisfy TypeScript
+      guessStage: 'day',
       monthGuess: month,
       score: newScore,
     };
