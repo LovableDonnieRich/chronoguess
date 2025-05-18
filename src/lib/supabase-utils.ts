@@ -45,7 +45,7 @@ export async function checkEventExists(date: Date, title: string) {
 }
 
 // Get event for today from the database
-export async function getTodaysEventFromDB() {
+export async function getTodaysEventFromDB(): Promise<HistoricalEvent | null> {
   const todayDate = new Date().toISOString().split('T')[0];
   
   const { data, error } = await supabase
@@ -237,7 +237,7 @@ export async function getCurrentGameState(userId: string, eventId: string): Prom
     return null;
   }
 
-  return data;
+  return data as GameStateType;
 }
 
 // Save game state to database
