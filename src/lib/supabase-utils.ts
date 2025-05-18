@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { HistoricalEvent } from "./game-utils";
 
@@ -26,8 +27,7 @@ export async function saveEventToDatabase(event: HistoricalEvent) {
       event_date: event.date.toISOString(),
       category: event.category,
       difficulty: event.difficulty,
-      created_at: new Date().toISOString(),
-      used_on_date: new Date().toISOString().split('T')[0] // Save the date this event was used
+      created_at: new Date().toISOString()
     })
     .select()
     .single();
@@ -61,10 +61,11 @@ export async function checkEventExists(date: Date, title: string) {
 export async function getTodaysEventFromDB(): Promise<HistoricalEvent | null> {
   const todayDate = new Date().toISOString().split('T')[0];
   
+  // Try to find an event that has been used today
   const { data, error } = await supabase
     .from('events')
     .select('*')
-    .eq('used_on_date', todayDate)
+    .eq('event_date', todayDate)
     .single();
   
   if (error) {
