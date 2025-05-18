@@ -1,5 +1,5 @@
 
-import { saveEventToDatabase, checkEventExists } from './supabase-utils';
+import { saveEventToDatabase, checkEventExists, getTodaysEventFromDB } from './supabase-utils';
 
 // Game scoring utilities
 export interface Score {
@@ -62,6 +62,7 @@ async function fetchHistoricalEvent(): Promise<HistoricalEvent | null> {
     
     // Construct the API URL
     const url = `https://events.historylabs.io/date?month=${month}&day=${day}&minYear=1100`;
+    console.log(`Fetching historical event from API: ${url}`);
     
     const response = await fetch(url);
     if (!response.ok) {
@@ -108,22 +109,39 @@ function determineDifficulty(date: Date): 'easy' | 'medium' | 'hard' {
 
 // Get today's event based on the date
 export async function getTodaysEvent(): Promise<HistoricalEvent> {
-  // Try to fetch an event from the API
+  // First, try to fetch from database
+  console.log('Checking for today\'s event in the database...');
+  const dbEvent = await getTodaysEventFromDB();
+  
+  if (dbEvent) {
+    console.log('Found today\'s event in database:', dbEvent.title);
+    return dbEvent;
+  }
+  
+  console.log('No event found for today, fetching from API...');
+  // If not in database, try to fetch an event from the API
   const event = await fetchHistoricalEvent();
   
   // Fallback event in case the API fails
   if (!event) {
-    return {
+    const fallbackEvent = {
       id: '1',
       title: 'Discovery of America',
       description: 'Christopher Columbus reaches the Americas, marking the beginning of European exploration in the New World.',
       date: new Date('1492-10-12'),
       category: 'Exploration',
-      difficulty: 'easy',
+      difficulty: 'easy' as const,
     };
+    
+    // Save the fallback event to the database
+    console.log('API fetch failed, using fallback event:', fallbackEvent.title);
+    await saveEventToDatabase(fallbackEvent);
+    
+    return fallbackEvent;
   }
   
   // Save the event to the database
+  console.log('Saving new event to database:', event.title);
   await saveEventToDatabase(event);
   
   return event;

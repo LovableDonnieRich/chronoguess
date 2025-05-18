@@ -12,7 +12,9 @@ export async function saveEventToDatabase(event: HistoricalEvent) {
       description: event.description,
       event_date: event.date.toISOString(),
       category: event.category,
-      difficulty: event.difficulty
+      difficulty: event.difficulty,
+      created_at: new Date().toISOString(),
+      used_on_date: new Date().toISOString().split('T')[0] // Save the date this event was used
     })
     .select()
     .single();
@@ -40,6 +42,36 @@ export async function checkEventExists(date: Date, title: string) {
   }
 
   return !!data;
+}
+
+// Get event for today from the database
+export async function getTodaysEventFromDB() {
+  const todayDate = new Date().toISOString().split('T')[0];
+  
+  const { data, error } = await supabase
+    .from('events')
+    .select('*')
+    .eq('used_on_date', todayDate)
+    .single();
+  
+  if (error) {
+    if (error.code === 'PGRST116') { // No rows returned
+      return null;
+    }
+    console.error('Error fetching today\'s event:', error);
+    return null;
+  }
+  
+  if (!data) return null;
+  
+  return {
+    id: data.id,
+    title: data.title,
+    description: data.description,
+    date: new Date(data.event_date),
+    category: data.category,
+    difficulty: data.difficulty as 'easy' | 'medium' | 'hard',
+  };
 }
 
 // Save user score to database

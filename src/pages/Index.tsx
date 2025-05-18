@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { YearGuess } from "@/components/YearGuess";
@@ -47,113 +46,158 @@ const Index = () => {
       }
       
       setLoading(true);
+      console.log("Initializing game...");
       
-      // Get the last played date from database
-      const lastPlayedDate = await getLastPlayedDate(user.id);
-      
-      if (lastPlayedDate && hasPlayedToday(lastPlayedDate)) {
-        // Get the current event and user's progress from the database
+      try {
+        // Get today's event first
+        console.log("Fetching today's event...");
         const todaysEvent = await getTodaysEvent();
+        console.log("Today's event:", todaysEvent);
+        
+        if (!todaysEvent) {
+          console.error("Failed to get today's event");
+          setLoading(false);
+          return;
+        }
+        
+        // Get the last played date from database
+        const lastPlayedDate = await getLastPlayedDate(user.id);
+        console.log("Last played date:", lastPlayedDate);
         
         // Get user's total score
         const userScore = await getUserTotalScore(user.id);
+        console.log("User score:", userScore);
         
-        // Get current game state
-        const currentGameState = await getCurrentGameState(user.id, todaysEvent.id);
-        
-        // If user has progress, set the game state accordingly
-        if (currentGameState) {
-          const eventDate = new Date(currentGameState.events.event_date);
+        if (lastPlayedDate && hasPlayedToday(lastPlayedDate)) {
+          console.log("User has already played today, getting current game state...");
+          // Get current game state
+          const currentGameState = await getCurrentGameState(user.id, todaysEvent.id);
           
-          // Determine the guess stage
-          let guessStage: 'year' | 'month' | 'day' | 'result' = 'year';
-          
-          if (currentGameState.year_guess !== null) {
-            guessStage = 'month';
+          // If user has progress, set the game state accordingly
+          if (currentGameState) {
+            console.log("Found current game state:", currentGameState);
+            const eventDate = new Date(currentGameState.events.event_date);
             
-            if (currentGameState.month_guess !== null) {
-              guessStage = 'day';
+            // Determine the guess stage
+            let guessStage: 'year' | 'month' | 'day' | 'result' = 'year';
+            
+            if (currentGameState.year_guess !== null) {
+              guessStage = 'month';
               
-              if (currentGameState.day_guess !== null) {
-                guessStage = 'result';
+              if (currentGameState.month_guess !== null) {
+                guessStage = 'day';
+                
+                if (currentGameState.day_guess !== null) {
+                  guessStage = 'result';
+                }
               }
             }
+            
+            setGameState({
+              currentEvent: {
+                id: todaysEvent.id,
+                title: currentGameState.events.title,
+                description: currentGameState.events.description,
+                date: eventDate,
+                category: currentGameState.events.category,
+                difficulty: currentGameState.events.difficulty as 'easy' | 'medium' | 'hard',
+              },
+              score: {
+                exactGuesses: userScore.exactGuesses,
+                closeGuesses: userScore.closeGuesses,
+                totalPoints: userScore.totalPoints
+              },
+              guessStage: guessStage,
+              yearGuess: currentGameState.year_guess,
+              monthGuess: currentGameState.month_guess,
+              dayGuess: currentGameState.day_guess,
+              lastPlayedDate: lastPlayedDate
+            });
+          } else {
+            console.log("No current game state found, starting new game...");
+            // No progress found, but it's the same day, start a new game
+            await startNewGame();
           }
-          
-          setGameState({
-            currentEvent: {
-              id: todaysEvent.id,
-              title: currentGameState.events.title,
-              description: currentGameState.events.description,
-              date: eventDate,
-              category: currentGameState.events.category,
-              difficulty: currentGameState.events.difficulty as 'easy' | 'medium' | 'hard',
-            },
-            score: {
-              exactGuesses: userScore.exactGuesses,
-              closeGuesses: userScore.closeGuesses,
-              totalPoints: userScore.totalPoints
-            },
-            guessStage: guessStage,
-            yearGuess: currentGameState.year_guess,
-            monthGuess: currentGameState.month_guess,
-            dayGuess: currentGameState.day_guess,
-            lastPlayedDate: lastPlayedDate
-          });
         } else {
-          // No progress found, but it's the same day, start a new game
+          console.log("Different day or never played, starting new game...");
+          // Different day or never played, start a new game
           await startNewGame();
         }
-      } else {
-        // Different day or never played, start a new game
-        await startNewGame();
+      } catch (error) {
+        console.error("Error initializing game:", error);
+        toast({
+          title: "Error",
+          description: "Failed to initialize game. Please try again later.",
+          variant: "destructive",
+        });
+      } finally {
+        setLoading(false);
       }
-      
-      setLoading(false);
     };
     
     initGame();
-  }, [authLoading, user]);
+  }, [authLoading, user, navigate]);
   
   const startNewGame = async () => {
     setLoading(true);
-    const today = new Date().toISOString().split('T')[0];
-    const todaysEvent = await getTodaysEvent();
+    console.log("Starting new game...");
     
-    // If user is logged in, check if they've played this event
-    let userHasPlayed = false;
-    if (user) {
-      userHasPlayed = await hasUserPlayedEvent(user.id, todaysEvent.id);
-    }
-    
-    // If user has played this event, get a different one
-    if (userHasPlayed) {
-      // For now, just use the event anyway
-      // In a real app, you'd want to get a different event
-    }
-    
-    // Get total user score from Supabase
-    let userScore = {
-      exactGuesses: 0,
-      closeGuesses: 0,
-      totalPoints: 0
-    };
-    
-    if (user) {
-      userScore = await getUserTotalScore(user.id);
-    }
-    
-    setGameState({
-      ...initialGameState,
-      currentEvent: todaysEvent,
-      lastPlayedDate: today,
-      score: {
-        exactGuesses: userScore.exactGuesses,
-        closeGuesses: userScore.closeGuesses,
-        totalPoints: userScore.totalPoints
+    try {
+      const today = new Date().toISOString().split('T')[0];
+      const todaysEvent = await getTodaysEvent();
+      console.log("Today's event for new game:", todaysEvent);
+      
+      if (!todaysEvent) {
+        console.error("Failed to get today's event for new game");
+        setLoading(false);
+        return;
       }
-    });
-    setLoading(false);
+      
+      // If user is logged in, check if they've played this event
+      let userHasPlayed = false;
+      if (user) {
+        userHasPlayed = await hasUserPlayedEvent(user.id, todaysEvent.id);
+        console.log("User has played this event:", userHasPlayed);
+      }
+      
+      // If user has played this event, get a different one
+      if (userHasPlayed) {
+        // For now, just use the event anyway
+        // In a real app, you'd want to get a different event
+      }
+      
+      // Get total user score from Supabase
+      let userScore = {
+        exactGuesses: 0,
+        closeGuesses: 0,
+        totalPoints: 0
+      };
+      
+      if (user) {
+        userScore = await getUserTotalScore(user.id);
+        console.log("User score for new game:", userScore);
+      }
+      
+      setGameState({
+        ...initialGameState,
+        currentEvent: todaysEvent,
+        lastPlayedDate: today,
+        score: {
+          exactGuesses: userScore.exactGuesses,
+          closeGuesses: userScore.closeGuesses,
+          totalPoints: userScore.totalPoints
+        }
+      });
+    } catch (error) {
+      console.error("Error starting new game:", error);
+      toast({
+        title: "Error",
+        description: "Failed to start a new game. Please try again later.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
   
   const handleYearGuess = (year: number) => {
