@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { YearGuess } from "@/components/YearGuess";
@@ -94,7 +93,7 @@ const Index = () => {
                 closeGuesses: userScore.closeGuesses,
                 totalPoints: userScore.totalPoints
               },
-              guessStage: 'result', // Always show result if they've already played
+              guessStage: 'result' as const, // Use 'as const' to fix TypeScript error
               yearGuess: currentGameState.year_guess,
               monthGuess: currentGameState.month_guess,
               dayGuess: currentGameState.day_guess,
@@ -157,7 +156,7 @@ const Index = () => {
         currentEvent: todaysEvent,
         lastPlayedDate: today,
         // If already played, set guessStage to 'result' to prevent playing again
-        guessStage: alreadyPlayed ? 'result' : 'year',
+        guessStage: (alreadyPlayed ? 'result' : 'year') as const, // Use 'as const' to fix TypeScript error
         score: {
           exactGuesses: userScore.exactGuesses,
           closeGuesses: userScore.closeGuesses,

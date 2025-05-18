@@ -18,13 +18,16 @@ export type GameStateType = {
 
 // Save event to database to avoid duplication
 export async function saveEventToDatabase(event: HistoricalEvent) {
+  // First, let's format the date consistently as YYYY-MM-DD
+  const formattedDate = event.date.toISOString().split('T')[0];
+  
   const { data, error } = await supabase
     .from('events')
     .insert({
       id: event.id,
       title: event.title,
       description: event.description,
-      event_date: event.date.toISOString(),
+      event_date: formattedDate,
       category: event.category,
       difficulty: event.difficulty,
       created_at: new Date().toISOString()
@@ -42,10 +45,13 @@ export async function saveEventToDatabase(event: HistoricalEvent) {
 
 // Check if an event with the same date and title already exists
 export async function checkEventExists(date: Date, title: string) {
+  // Format date consistently as YYYY-MM-DD
+  const formattedDate = date.toISOString().split('T')[0];
+  
   const { data, error } = await supabase
     .from('events')
     .select('id')
-    .eq('event_date', date.toISOString().split('T')[0])
+    .eq('event_date', formattedDate)
     .eq('title', title)
     .single();
 
@@ -61,7 +67,7 @@ export async function checkEventExists(date: Date, title: string) {
 export async function getTodaysEventFromDB(): Promise<HistoricalEvent | null> {
   const todayDate = new Date().toISOString().split('T')[0];
   
-  // Try to find an event that has been used today
+  // Try to find an event that has been set for today's date
   const { data, error } = await supabase
     .from('events')
     .select('*')
@@ -70,6 +76,7 @@ export async function getTodaysEventFromDB(): Promise<HistoricalEvent | null> {
   
   if (error) {
     if (error.code === 'PGRST116') { // No rows returned
+      console.log('No event found for today, will create a new one');
       return null;
     }
     console.error('Error fetching today\'s event:', error);
@@ -102,6 +109,11 @@ export async function saveUserScore(
   exactGuesses: number,
   closeGuesses: number
 ) {
+  console.log('Saving user score to database:', {
+    userId, eventId, yearGuess, yearAccuracy, monthGuess, monthAccuracy,
+    dayGuess, dayAccuracy, totalPoints, exactGuesses, closeGuesses
+  });
+  
   const { data, error } = await supabase
     .from('user_scores')
     .insert({
@@ -126,6 +138,7 @@ export async function saveUserScore(
     return null;
   }
 
+  console.log('User score saved successfully:', data);
   return data;
 }
 
@@ -174,6 +187,8 @@ export async function getUserTotalScore(userId: string) {
 
 // Check if user has played a specific event
 export async function hasUserPlayedEvent(userId: string, eventId: string): Promise<boolean> {
+  console.log('Checking if user has played event:', userId, eventId);
+  
   const { data, error } = await supabase
     .from('user_scores')
     .select('id, day_guess')
@@ -188,7 +203,9 @@ export async function hasUserPlayedEvent(userId: string, eventId: string): Promi
 
   // Consider the event fully played only if day_guess is not null
   // This handles the case where they might have started the game but not completed it
-  return !!data && data.day_guess !== null;
+  const hasPlayed = !!data && data.day_guess !== null;
+  console.log('User has played event:', hasPlayed);
+  return hasPlayed;
 }
 
 // Get last played date for user
@@ -257,6 +274,8 @@ export async function saveGameState(
     closeGuesses?: number;
   }
 ) {
+  console.log('Saving game state:', gameState);
+  
   // Check if a record already exists
   const existing = await getCurrentGameState(userId, eventId);
 
@@ -277,6 +296,7 @@ export async function saveGameState(
 
   if (existing) {
     // Update existing record
+    console.log('Updating existing game state record');
     const { data, error } = await supabase
       .from('user_scores')
       .update(updateData)
@@ -290,9 +310,11 @@ export async function saveGameState(
       return null;
     }
     
+    console.log('Game state updated successfully');
     return data;
   } else {
     // Insert new record
+    console.log('Inserting new game state record');
     const { data, error } = await supabase
       .from('user_scores')
       .insert(updateData)
@@ -304,6 +326,7 @@ export async function saveGameState(
       return null;
     }
     
+    console.log('Game state saved successfully');
     return data;
   }
 }

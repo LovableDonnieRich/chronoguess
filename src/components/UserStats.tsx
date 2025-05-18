@@ -24,7 +24,10 @@ export function UserStats({ refreshTrigger }: UserStatsProps) {
       
       setLoading(true);
       try {
+        console.log("Fetching user stats with refreshTrigger:", refreshTrigger);
         const userScores = await getUserTotalScore(user.id);
+        console.log("User scores fetched:", userScores);
+        
         setStats({
           totalPoints: userScores.totalPoints,
           exactGuesses: userScores.exactGuesses,
