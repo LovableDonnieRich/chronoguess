@@ -94,7 +94,7 @@ const Index = () => {
                 closeGuesses: userScore.closeGuesses,
                 totalPoints: userScore.totalPoints
               },
-              guessStage: 'result', // Use 'as const' to fix TypeScript error
+              guessStage: 'result',
               yearGuess: currentGameState.year_guess,
               monthGuess: currentGameState.month_guess,
               dayGuess: currentGameState.day_guess,

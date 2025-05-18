@@ -71,6 +71,7 @@ async function fetchHistoricalEvent(): Promise<HistoricalEvent | null> {
     }
     
     const events = await response.json();
+    console.log('API returned events:', events);
     
     // If no events are returned
     if (!events || events.length === 0) {
@@ -92,6 +93,7 @@ async function fetchHistoricalEvent(): Promise<HistoricalEvent | null> {
       difficulty: determineDifficulty(new Date(event.date)),
     };
     
+    console.log('Transformed historical event:', historicalEvent);
     return historicalEvent;
   } catch (error) {
     console.error('Error fetching historical event:', error);
@@ -108,7 +110,7 @@ function determineDifficulty(date: Date): 'easy' | 'medium' | 'hard' {
 }
 
 // Get today's event based on the date
-export async function getTodaysEvent(): Promise<HistoricalEvent> {
+export async function getTodaysEvent(): Promise<HistoricalEvent | null> {
   // First, try to fetch from database
   console.log('Checking for today\'s event in the database...');
   const dbEvent = await getTodaysEventFromDB();
@@ -124,25 +126,33 @@ export async function getTodaysEvent(): Promise<HistoricalEvent> {
   
   // Fallback event in case the API fails
   if (!event) {
-    const fallbackEvent = {
-      id: '1',
+    console.log('API fetch failed, using fallback event');
+    const fallbackEvent: HistoricalEvent = {
+      id: Math.random().toString(36).substr(2, 9),
       title: 'Discovery of America',
       description: 'Christopher Columbus reaches the Americas, marking the beginning of European exploration in the New World.',
       date: new Date('1492-10-12'),
       category: 'Exploration',
-      difficulty: 'easy' as const,
+      difficulty: 'easy',
     };
     
     // Save the fallback event to the database
-    console.log('API fetch failed, using fallback event:', fallbackEvent.title);
+    console.log('Saving fallback event to database:', fallbackEvent.title);
     await saveEventToDatabase(fallbackEvent);
     
     return fallbackEvent;
   }
   
-  // Save the event to the database
-  console.log('Saving new event to database:', event.title);
-  await saveEventToDatabase(event);
+  // Check if this event already exists in the database
+  const exists = await checkEventExists(event.date, event.title);
+  
+  if (!exists) {
+    // Save the event to the database
+    console.log('Saving new event to database:', event.title);
+    await saveEventToDatabase(event);
+  } else {
+    console.log('Event already exists in database, not saving');
+  }
   
   return event;
 }
